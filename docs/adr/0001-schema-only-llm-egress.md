@@ -1,0 +1,3 @@
+# The LLM never sees patient rows
+
+The QA pipeline sends only the database schema, curated query-template descriptions, and the user's question to the hosted LLM (DeepSeek V4-Flash). The LLM classifies the question and fills template slots; all SQL executes locally against DuckDB, and answers are assembled deterministically from the retrieved rows. We chose this over letting the LLM read or summarize patient data because it makes hallucination structurally impossible in answer content, makes abstention measurable (no matching template = principled refusal), and satisfies the challenge rules on minimizing patient-level data sent to external services. The cost is flexibility: questions outside the template inventory are refused rather than attempted.
