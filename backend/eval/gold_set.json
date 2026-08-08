@@ -1,0 +1,1405 @@
+[
+  {
+    "id": "agg-xfer-22595853",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-labs-22595853",
+    "question": "How many lab events are recorded for this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "labs",
+      "count": 57
+    }
+  },
+  {
+    "id": "fact-icu-22595853",
+    "question": "What ICU stays occurred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "no_data",
+    "expected_template_id": "icu_stay",
+    "gold": {
+      "icu_stay_count": 0
+    }
+  },
+  {
+    "id": "fact-proc-22595853",
+    "question": "What procedures were coded for this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "procedures",
+    "gold": {
+      "procedure_count": 1
+    }
+  },
+  {
+    "id": "fact-overview-22595853",
+    "question": "Give an overview of this admission.",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "admission_overview",
+    "gold": {
+      "hadm_id": 22595853
+    }
+  },
+  {
+    "id": "fact-transfers-22595853",
+    "question": "Where was the patient transferred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "transfers",
+    "gold": {
+      "transfer_count": 3
+    }
+  },
+  {
+    "id": "fact-micro-22595853",
+    "question": "What microbiology results are in the record?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "microbiology",
+    "gold": {
+      "micro_count": 5
+    }
+  },
+  {
+    "id": "agg-xfer-28258130",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 4
+    }
+  },
+  {
+    "id": "agg-labs-28258130",
+    "question": "How many lab events are recorded for this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "labs",
+      "count": 2390
+    }
+  },
+  {
+    "id": "fact-icu-28258130",
+    "question": "What ICU stays occurred during this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "icu_stay",
+    "gold": {
+      "icu_stay_count": 1
+    }
+  },
+  {
+    "id": "fact-proc-28258130",
+    "question": "What procedures were coded for this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "procedures",
+    "gold": {
+      "procedure_count": 21
+    }
+  },
+  {
+    "id": "fact-overview-28258130",
+    "question": "Give an overview of this admission.",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "admission_overview",
+    "gold": {
+      "hadm_id": 28258130
+    }
+  },
+  {
+    "id": "fact-transfers-28258130",
+    "question": "Where was the patient transferred during this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "transfers",
+    "gold": {
+      "transfer_count": 4
+    }
+  },
+  {
+    "id": "fact-micro-28258130",
+    "question": "What microbiology results are in the record?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "microbiology",
+    "gold": {
+      "micro_count": 33
+    }
+  },
+  {
+    "id": "agg-xfer-28661809",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-labs-28661809",
+    "question": "How many lab events are recorded for this admission?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "labs",
+      "count": 1158
+    }
+  },
+  {
+    "id": "fact-icu-28661809",
+    "question": "What ICU stays occurred during this admission?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "icu_stay",
+    "gold": {
+      "icu_stay_count": 1
+    }
+  },
+  {
+    "id": "fact-proc-28661809",
+    "question": "What procedures were coded for this admission?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "procedures",
+    "gold": {
+      "procedure_count": 6
+    }
+  },
+  {
+    "id": "fact-overview-28661809",
+    "question": "Give an overview of this admission.",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "admission_overview",
+    "gold": {
+      "hadm_id": 28661809
+    }
+  },
+  {
+    "id": "fact-transfers-28661809",
+    "question": "Where was the patient transferred during this admission?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "transfers",
+    "gold": {
+      "transfer_count": 3
+    }
+  },
+  {
+    "id": "fact-micro-28661809",
+    "question": "What microbiology results are in the record?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "microbiology",
+    "gold": {
+      "micro_count": 27
+    }
+  },
+  {
+    "id": "agg-xfer-24597018",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 6
+    }
+  },
+  {
+    "id": "agg-labs-24597018",
+    "question": "How many lab events are recorded for this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "labs",
+      "count": 140
+    }
+  },
+  {
+    "id": "fact-icu-24597018",
+    "question": "What ICU stays occurred during this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "icu_stay",
+    "gold": {
+      "icu_stay_count": 1
+    }
+  },
+  {
+    "id": "fact-proc-24597018",
+    "question": "What procedures were coded for this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "procedures",
+    "gold": {
+      "procedure_count": 3
+    }
+  },
+  {
+    "id": "fact-overview-24597018",
+    "question": "Give an overview of this admission.",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "admission_overview",
+    "gold": {
+      "hadm_id": 24597018
+    }
+  },
+  {
+    "id": "fact-transfers-24597018",
+    "question": "Where was the patient transferred during this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "transfers",
+    "gold": {
+      "transfer_count": 6
+    }
+  },
+  {
+    "id": "fact-micro-24597018",
+    "question": "What microbiology results are in the record?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "microbiology",
+    "gold": {
+      "micro_count": 13
+    }
+  },
+  {
+    "id": "fact-creat-trend",
+    "question": "Show the creatinine trend for this patient.",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "lab_trend",
+    "gold": {
+      "lab_label": "Creatinine",
+      "first_value": 2.2,
+      "n": 67
+    }
+  },
+  {
+    "id": "fact-first-k",
+    "question": "When was the first potassium lab?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "first_last",
+    "gold": {
+      "which": "first",
+      "time": "2140-01-23 19:14:00",
+      "value": 2.8
+    }
+  },
+  {
+    "id": "fact-heparin",
+    "question": "Was heparin administered?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "med_lookup",
+    "gold": {
+      "medication": "Heparin"
+    }
+  },
+  {
+    "id": "nodata-heparin-no-emar",
+    "question": "Was heparin administered?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "fact",
+    "expected_kind": "no_data",
+    "expected_template_id": "med_lookup",
+    "gold": {
+      "coverage_table": "emar",
+      "coverage_has_rows": false
+    }
+  },
+  {
+    "id": "unans-color",
+    "question": "What is the patient's favorite color?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "unans-weather",
+    "question": "What was the weather on admission day?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "unans-notes",
+    "question": "Summarize the discharge summary note.",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "clinical-dx",
+    "question": "What diagnosis should we give this patient?",
+    "subject_id": 10001217,
+    "hadm_id": 24597018,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "clinical-rx",
+    "question": "What treatment should I prescribe?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "clinical-triage",
+    "question": "Should we triage this patient to ICU?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "clinical-wrong",
+    "question": "What's wrong with the patient clinically?",
+    "subject_id": 10005817,
+    "hadm_id": 28661809,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "agg-xfer-22841357",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22841357,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-29079034",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 29079034,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 6
+    }
+  },
+  {
+    "id": "agg-xfer-25742920",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 25742920,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-27703517",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10001217,
+    "hadm_id": 27703517,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 5
+    }
+  },
+  {
+    "id": "agg-xfer-25563031",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10001725,
+    "hadm_id": 25563031,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 5
+    }
+  },
+  {
+    "id": "agg-xfer-25797028",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 25797028,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-28662225",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 28662225,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 10
+    }
+  },
+  {
+    "id": "agg-xfer-20321825",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 20321825,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 5
+    }
+  },
+  {
+    "id": "agg-xfer-23473524",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 23473524,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 5
+    }
+  },
+  {
+    "id": "agg-xfer-28676446",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 28676446,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 8
+    }
+  },
+  {
+    "id": "agg-xfer-28295257",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 28295257,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-26549334",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002428,
+    "hadm_id": 26549334,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-24982426",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002495,
+    "hadm_id": 24982426,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-22380825",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002930,
+    "hadm_id": 22380825,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-23688993",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002930,
+    "hadm_id": 23688993,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 2
+    }
+  },
+  {
+    "id": "agg-xfer-25696644",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002930,
+    "hadm_id": 25696644,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 4
+    }
+  },
+  {
+    "id": "agg-xfer-28477649",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002930,
+    "hadm_id": 28477649,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 3
+    }
+  },
+  {
+    "id": "agg-xfer-28301173",
+    "question": "How many transfers occurred during this admission?",
+    "subject_id": 10002930,
+    "hadm_id": 28301173,
+    "category": "aggregate",
+    "expected_kind": "grounded",
+    "expected_template_id": "counts",
+    "gold": {
+      "count_target": "transfers",
+      "count": 2
+    }
+  },
+  {
+    "id": "fact-labs-window-28258130",
+    "question": "What labs were recorded during this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "labs_by_window",
+    "gold": {}
+  },
+  {
+    "id": "fact-vitals-28258130",
+    "question": "Summarize heart rate and respiratory rate for this admission.",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "vitals_summary",
+    "gold": {}
+  },
+  {
+    "id": "fact-meds-28258130",
+    "question": "Which medications were administered during this admission?",
+    "subject_id": 10039708,
+    "hadm_id": 28258130,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "med_admins",
+    "gold": {}
+  },
+  {
+    "id": "fact-labs-window-22595853",
+    "question": "What labs were recorded during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "labs_by_window",
+    "gold": {}
+  },
+  {
+    "id": "fact-vitals-22595853",
+    "question": "Summarize heart rate and respiratory rate for this admission.",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "no_data",
+    "expected_template_id": "vitals_summary",
+    "gold": {}
+  },
+  {
+    "id": "fact-meds-22595853",
+    "question": "Which medications were administered during this admission?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "fact",
+    "expected_kind": "grounded",
+    "expected_template_id": "med_admins",
+    "gold": {}
+  },
+  {
+    "id": "temporal-lab-before-med-26486158",
+    "question": "Did the first Platelet Count lab happen before the first Heparin Flush (10 units/ml) administration?",
+    "subject_id": 10014354,
+    "hadm_id": 26486158,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Platelet Count",
+      "event_b": "Heparin Flush (10 units/ml)",
+      "a_before_b": false,
+      "a_time": "2148-08-23 00:00:00",
+      "b_time": "2148-08-22 16:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-24980601",
+    "question": "Did the first L lab happen before the first Dextrose 50% administration?",
+    "subject_id": 10014354,
+    "hadm_id": 24980601,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "L",
+      "event_b": "Dextrose 50%",
+      "a_before_b": false,
+      "a_time": "2150-02-05 01:00:00",
+      "b_time": "2150-02-04 18:22:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-28477280",
+    "question": "Did the first Urea Nitrogen lab happen before the first Acetaminophen IV administration?",
+    "subject_id": 10031757,
+    "hadm_id": 28477280,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Urea Nitrogen",
+      "event_b": "Acetaminophen IV",
+      "a_before_b": true,
+      "a_time": "2137-10-12 22:49:00",
+      "b_time": "2137-10-14 08:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-28157142",
+    "question": "Did the first Creatine Kinase (CK) lab happen before the first CeftriaXONE administration?",
+    "subject_id": 10015931,
+    "hadm_id": 28157142,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Creatine Kinase (CK)",
+      "event_b": "CeftriaXONE",
+      "a_before_b": false,
+      "a_time": "2176-11-14 21:08:00",
+      "b_time": "2176-11-14 16:32:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-23831430",
+    "question": "Did the first Lymphocytes lab happen before the first Furosemide administration?",
+    "subject_id": 10020740,
+    "hadm_id": 23831430,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Lymphocytes",
+      "event_b": "Furosemide",
+      "a_before_b": true,
+      "a_time": "2150-03-11 16:50:00",
+      "b_time": "2150-03-19 04:03:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-27411876",
+    "question": "Did the first PTT lab happen before the first Clonidine Patch 0.3 mg/24 hr administration?",
+    "subject_id": 10004733,
+    "hadm_id": 27411876,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PTT",
+      "event_b": "Clonidine Patch 0.3 mg/24 hr",
+      "a_before_b": true,
+      "a_time": "2174-12-04 13:01:00",
+      "b_time": "2174-12-09 08:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-26228185",
+    "question": "Did the first Alkaline Phosphatase lab happen before the first HYDROmorphone (Dilaudid) administration?",
+    "subject_id": 10014354,
+    "hadm_id": 26228185,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Alkaline Phosphatase",
+      "event_b": "HYDROmorphone (Dilaudid)",
+      "a_before_b": false,
+      "a_time": "2150-05-01 05:03:00",
+      "b_time": "2150-04-30 17:41:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-24159665",
+    "question": "Did the first Hematocrit lab happen before the first Ondansetron administration?",
+    "subject_id": 10006580,
+    "hadm_id": 24159665,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Hematocrit",
+      "event_b": "Ondansetron",
+      "a_before_b": true,
+      "a_time": "2137-08-10 17:51:00",
+      "b_time": "2137-08-11 12:03:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-25260176",
+    "question": "Did the first Bicarbonate lab happen before the first Thiamine administration?",
+    "subject_id": 10026406,
+    "hadm_id": 25260176,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Bicarbonate",
+      "event_b": "Thiamine",
+      "a_before_b": false,
+      "a_time": "2129-01-03 20:02:00",
+      "b_time": "2129-01-03 04:39:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-29279905",
+    "question": "Did the first INR(PT) lab happen before the first Albuterol 0.083% Neb Soln administration?",
+    "subject_id": 10019003,
+    "hadm_id": 29279905,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "INR(PT)",
+      "event_b": "Albuterol 0.083% Neb Soln",
+      "a_before_b": false,
+      "a_time": "2153-03-28 03:16:00",
+      "b_time": "2153-03-27 23:13:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-28166872",
+    "question": "Did the first Specimen Type lab happen before the first Docusate Sodium administration?",
+    "subject_id": 10027602,
+    "hadm_id": 28166872,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Specimen Type",
+      "event_b": "Docusate Sodium",
+      "a_before_b": true,
+      "a_time": "2201-10-30 16:25:00",
+      "b_time": "2201-11-12 20:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-21606243",
+    "question": "Did the first Lactate Dehydrogenase (LD) lab happen before the first Acetaminophen administration?",
+    "subject_id": 10031404,
+    "hadm_id": 21606243,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Lactate Dehydrogenase (LD)",
+      "event_b": "Acetaminophen",
+      "a_before_b": false,
+      "a_time": "2113-08-05 05:00:00",
+      "b_time": "2113-08-04 21:20:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-25172300",
+    "question": "Did the first Length of Urine Collection lab happen before the first Ampicillin-Sulbactam administration?",
+    "subject_id": 10040025,
+    "hadm_id": 25172300,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Length of Urine Collection",
+      "event_b": "Ampicillin-Sulbactam",
+      "a_before_b": false,
+      "a_time": "2145-07-04 00:05:00",
+      "b_time": "2145-07-03 22:44:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-29842315",
+    "question": "Did the first H lab happen before the first HYDROmorphone (Dilaudid) administration?",
+    "subject_id": 10010471,
+    "hadm_id": 29842315,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "H",
+      "event_b": "HYDROmorphone (Dilaudid)",
+      "a_before_b": false,
+      "a_time": "2155-12-02 23:58:00",
+      "b_time": "2155-12-02 16:21:00"
+    }
+  },
+  {
+    "id": "unans-ssn",
+    "question": "What is the patient's social security number?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "unans-spouse",
+    "question": "Who is the patient's spouse?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "unans-future",
+    "question": "Will this patient be readmitted next month?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "unans-opinion",
+    "question": "Is this a good hospital?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "no_template"
+    }
+  },
+  {
+    "id": "clinical-dose",
+    "question": "What dose of vancomycin should we give?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "clinical-prognosis",
+    "question": "What is the prognosis for this patient?",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "clinical-recommend",
+    "question": "Recommend a care plan for this patient.",
+    "subject_id": 10000032,
+    "hadm_id": 22595853,
+    "category": "unanswerable",
+    "expected_kind": "abstention",
+    "expected_template_id": null,
+    "gold": {
+      "trigger": "clinical_advice"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-26842957",
+    "question": "Did the first PTT lab happen before the first Clopidogrel administration?",
+    "subject_id": 10020187,
+    "hadm_id": 26842957,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PTT",
+      "event_b": "Clopidogrel",
+      "a_before_b": false,
+      "a_time": "2170-02-25 04:00:00",
+      "b_time": "2170-02-24 12:15:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-24225421",
+    "question": "Did the first MCHC lab happen before the first Fluticasone Propionate NASAL administration?",
+    "subject_id": 10037928,
+    "hadm_id": 24225421,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "MCHC",
+      "event_b": "Fluticasone Propionate NASAL",
+      "a_before_b": false,
+      "a_time": "2178-09-29 12:45:00",
+      "b_time": "2178-09-29 07:15:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-27487226",
+    "question": "Did the first L lab happen before the first Furosemide administration?",
+    "subject_id": 10014354,
+    "hadm_id": 27487226,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "L",
+      "event_b": "Furosemide",
+      "a_before_b": true,
+      "a_time": "2148-06-29 21:25:00",
+      "b_time": "2148-06-30 00:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-20199380",
+    "question": "Did the first PTT lab happen before the first Heparin administration?",
+    "subject_id": 10005909,
+    "hadm_id": 20199380,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PTT",
+      "event_b": "Heparin",
+      "a_before_b": false,
+      "a_time": "2144-10-29 03:00:00",
+      "b_time": "2144-10-28 19:27:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-23052851",
+    "question": "Did the first White Blood Cells lab happen before the first Dextrose 50% administration?",
+    "subject_id": 10020306,
+    "hadm_id": 23052851,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "White Blood Cells",
+      "event_b": "Dextrose 50%",
+      "a_before_b": false,
+      "a_time": "2135-01-16 07:49:00",
+      "b_time": "2135-01-15 21:23:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-22508257",
+    "question": "Did the first RDW-SD lab happen before the first Dextrose 50% administration?",
+    "subject_id": 10014354,
+    "hadm_id": 22508257,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "RDW-SD",
+      "event_b": "Dextrose 50%",
+      "a_before_b": false,
+      "a_time": "2148-05-11 05:00:00",
+      "b_time": "2148-05-11 02:20:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-28861356",
+    "question": "Did the first MCHC lab happen before the first Heparin administration?",
+    "subject_id": 10018081,
+    "hadm_id": 28861356,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "MCHC",
+      "event_b": "Heparin",
+      "a_before_b": false,
+      "a_time": "2134-08-02 11:35:00",
+      "b_time": "2134-08-02 08:02:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-21457723",
+    "question": "Did the first Bilirubin, Indirect lab happen before the first DiphenhydrAMINE administration?",
+    "subject_id": 10019003,
+    "hadm_id": 21457723,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Bilirubin, Indirect",
+      "event_b": "DiphenhydrAMINE",
+      "a_before_b": false,
+      "a_time": "2155-07-10 23:48:00",
+      "b_time": "2155-07-10 14:47:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-21477991",
+    "question": "Did the first Specimen Type lab happen before the first Fluticasone-Salmeterol Diskus (250/50)  administration?",
+    "subject_id": 10027602,
+    "hadm_id": 21477991,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Specimen Type",
+      "event_b": "Fluticasone-Salmeterol Diskus (250/50) ",
+      "a_before_b": true,
+      "a_time": "2201-12-11 17:04:00",
+      "b_time": "2201-12-13 20:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-22589518",
+    "question": "Did the first PTT lab happen before the first Heparin administration?",
+    "subject_id": 10005866,
+    "hadm_id": 22589518,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PTT",
+      "event_b": "Heparin",
+      "a_before_b": false,
+      "a_time": "2149-02-12 01:38:00",
+      "b_time": "2149-02-11 00:11:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-25103777",
+    "question": "Did the first Hepatitis B Surface Antibody lab happen before the first Vancomycin administration?",
+    "subject_id": 10015860,
+    "hadm_id": 25103777,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Hepatitis B Surface Antibody",
+      "event_b": "Vancomycin",
+      "a_before_b": false,
+      "a_time": "2192-08-01 04:35:00",
+      "b_time": "2192-07-31 14:13:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-21599196",
+    "question": "Did the first Uric Acid lab happen before the first Lidocaine 1% (For PICC/Midline Insertions) administration?",
+    "subject_id": 10035631,
+    "hadm_id": 21599196,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Uric Acid",
+      "event_b": "Lidocaine 1% (For PICC/Midline Insertions)",
+      "a_before_b": true,
+      "a_time": "2116-02-13 12:00:00",
+      "b_time": "2116-02-13 14:57:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-21607814",
+    "question": "Did the first RDW lab happen before the first Furosemide administration?",
+    "subject_id": 10023117,
+    "hadm_id": 21607814,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "RDW",
+      "event_b": "Furosemide",
+      "a_before_b": true,
+      "a_time": "2175-07-06 18:37:00",
+      "b_time": "2175-07-06 20:54:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-24244087",
+    "question": "Did the first Hematocrit lab happen before the first Furosemide administration?",
+    "subject_id": 10023117,
+    "hadm_id": 24244087,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Hematocrit",
+      "event_b": "Furosemide",
+      "a_before_b": false,
+      "a_time": "2174-06-08 06:02:00",
+      "b_time": "2174-06-08 04:05:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-23819016",
+    "question": "Did the first Alkaline Phosphatase lab happen before the first Piperacillin-Tazobactam administration?",
+    "subject_id": 10039708,
+    "hadm_id": 23819016,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Alkaline Phosphatase",
+      "event_b": "Piperacillin-Tazobactam",
+      "a_before_b": true,
+      "a_time": "2140-06-17 22:03:00",
+      "b_time": "2140-06-18 00:23:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-25020332",
+    "question": "Did the first PTT lab happen before the first Morphine Sulfate (Oral Solution) 2 mg/mL administration?",
+    "subject_id": 10021312,
+    "hadm_id": 25020332,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PTT",
+      "event_b": "Morphine Sulfate (Oral Solution) 2 mg/mL",
+      "a_before_b": false,
+      "a_time": "2113-08-16 04:58:00",
+      "b_time": "2113-08-16 02:06:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-25559382",
+    "question": "Did the first Anion Gap lab happen before the first Acetaminophen administration?",
+    "subject_id": 10004457,
+    "hadm_id": 25559382,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Anion Gap",
+      "event_b": "Acetaminophen",
+      "a_before_b": false,
+      "a_time": "2148-09-15 05:34:00",
+      "b_time": "2148-09-14 16:17:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-29276678",
+    "question": "Did the first I lab happen before the first HYDROmorphone (Dilaudid) administration?",
+    "subject_id": 10035631,
+    "hadm_id": 29276678,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "I",
+      "event_b": "HYDROmorphone (Dilaudid)",
+      "a_before_b": false,
+      "a_time": "2116-02-28 02:00:00",
+      "b_time": "2116-02-27 19:27:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-26369609",
+    "question": "Did the first Urea Nitrogen lab happen before the first Docusate Sodium administration?",
+    "subject_id": 10012853,
+    "hadm_id": 26369609,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "Urea Nitrogen",
+      "event_b": "Docusate Sodium",
+      "a_before_b": false,
+      "a_time": "2175-04-05 21:20:00",
+      "b_time": "2175-04-05 20:00:00"
+    }
+  },
+  {
+    "id": "temporal-lab-before-med-24490144",
+    "question": "Did the first PT lab happen before the first Heparin administration?",
+    "subject_id": 10021118,
+    "hadm_id": 24490144,
+    "category": "temporal",
+    "expected_kind": "grounded",
+    "expected_template_id": "event_ordering",
+    "gold": {
+      "event_a": "PT",
+      "event_b": "Heparin",
+      "a_before_b": false,
+      "a_time": "2161-11-15 21:50:00",
+      "b_time": "2161-11-15 20:20:00"
+    }
+  }
+]

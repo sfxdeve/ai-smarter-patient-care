@@ -1,0 +1,34 @@
+{
+  "reports": [
+    {
+      "name": "oracle_template",
+      "n": 104,
+      "structured_fact_accuracy": 1.0,
+      "temporal_order_accuracy": 1.0,
+      "provenance_coverage": 1.0,
+      "abstention_accuracy": 1.0,
+      "kind_accuracy": 1.0,
+      "error_count": 0
+    },
+    {
+      "name": "keyword_baseline",
+      "n": 104,
+      "structured_fact_accuracy": 1.0,
+      "temporal_order_accuracy": 1.0,
+      "provenance_coverage": 1.0,
+      "abstention_accuracy": 1.0,
+      "kind_accuracy": 1.0,
+      "error_count": 0
+    },
+    {
+      "name": "llm_deepseek",
+      "n": 104,
+      "structured_fact_accuracy": 0.9107142857142857,
+      "temporal_order_accuracy": 0.0,
+      "provenance_coverage": 1.0,
+      "abstention_accuracy": 1.0,
+      "kind_accuracy": 0.625,
+      "error_count": 39
+    }
+  ]
+}
