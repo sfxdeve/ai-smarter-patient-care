@@ -126,7 +126,6 @@ export type QaResponse = {
   sql: string | null
   interpreter: "llm" | "keyword" | "keyword_rescue" | "fake"
   abstention_reason: string | null
-  is_ai_phrasing: boolean
 }
 
 export type ExampleQuestion = {

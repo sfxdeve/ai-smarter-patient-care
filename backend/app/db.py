@@ -18,17 +18,12 @@ HOSP_TABLES = [
     "labevents",
     "d_labitems",
     "emar",
-    "emar_detail",
     "microbiologyevents",
     "procedures_icd",
     "d_icd_procedures",
     "diagnoses_icd",
     "d_icd_diagnoses",
     "drgcodes",
-    "services",
-    "prescriptions",
-    "pharmacy",
-    "hcpcsevents",
 ]
 
 ICU_TABLES = [
@@ -36,9 +31,6 @@ ICU_TABLES = [
     "chartevents",
     "d_items",
     "procedureevents",
-    "inputevents",
-    "outputevents",
-    "datetimeevents",
 ]
 
 # Vital-sign itemids used for ICU observation banding (common MIMIC items).

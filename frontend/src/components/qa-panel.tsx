@@ -42,7 +42,7 @@ export function QaPanel({
         </h3>
         <p className="text-sm text-muted-foreground">
           The interpreter sees only schema + Query Templates + your question. Answers are assembled
-          from local SQL. AI-phrased text is marked separately from source values.
+          from local SQL; the summary is a fixed template string, separate from source rows.
           {hadmId == null
             ? " Questions are scoped to this Patient (no Admission selected)."
             : " Questions are scoped to the selected Admission."}
@@ -94,7 +94,7 @@ export function QaPanel({
               <Badge variant="outline">template: {answer.template_id}</Badge>
             ) : null}
           </div>
-          <p className="text-sm italic text-foreground/80" title="AI-phrased summary">
+          <p className="text-sm italic text-foreground/80" title="Template summary">
             {answer.summary}
           </p>
           {answer.slots && Object.keys(answer.slots).length > 0 ? (

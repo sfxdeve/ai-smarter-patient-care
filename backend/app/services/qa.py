@@ -67,7 +67,6 @@ def answer_question(
             summary=f"Abstention: {result.reason}",
             interpreter=interpreter_used,
             abstention_reason=result.reason,
-            is_ai_phrasing=True,
         )
 
     assert isinstance(result, TemplateChoice)
@@ -96,7 +95,6 @@ def answer_question(
             slots=slots,
             sql=tr.sql,
             interpreter=interpreter_used,
-            is_ai_phrasing=True,
         )
 
     # Ensure every row-backed fact has provenance (invariant)
@@ -114,5 +112,4 @@ def answer_question(
         slots=slots,
         sql=tr.sql,
         interpreter=interpreter_used,
-        is_ai_phrasing=True,
     )

@@ -126,7 +126,6 @@ class QaResponse(BaseModel):
     sql: str | None = None
     interpreter: Literal["llm", "keyword", "keyword_rescue", "fake"]
     abstention_reason: str | None = None
-    is_ai_phrasing: bool = True
 
 
 class ExampleQuestion(BaseModel):
