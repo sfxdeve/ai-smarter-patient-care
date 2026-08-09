@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { AlertCircle, Info } from "lucide-react"
 
 import { AdmissionTimeline } from "@/components/admission-timeline"
+import { BillingPanel } from "@/components/billing-panel"
 import type { AdmissionSearch } from "@/lib/admission-search"
 import { RouteBreadcrumbs } from "@/components/route-breadcrumbs"
 import { WithQaRail } from "@/components/with-qa-rail"
@@ -183,12 +184,15 @@ export function AdmissionPage({
               <AlertDescription>{patient.data.date_shift_note}</AlertDescription>
             </Alert>
 
-            <AdmissionTimeline
-              subjectId={subjectIdNum}
-              hadmId={hadmIdNum}
-              search={search}
-              onSearchChange={onSearchChange}
-            />
+            <div className="grid gap-8 xl:grid-cols-[1fr_20rem]">
+              <AdmissionTimeline
+                subjectId={subjectIdNum}
+                hadmId={hadmIdNum}
+                search={search}
+                onSearchChange={onSearchChange}
+              />
+              <BillingPanel subjectId={subjectIdNum} hadmId={hadmIdNum} />
+            </div>
           </div>
         </WithQaRail>
       ) : null}
