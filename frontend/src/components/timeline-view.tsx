@@ -11,7 +11,11 @@ import {
 } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { api, type TimelineEvent } from "@/lib/api"
+import {
+  api,
+  type IcuStayInterval,
+  type TimelineEvent,
+} from "@/lib/api"
 
 const ALL_TYPES = [
   "admit_discharge",
@@ -23,15 +27,31 @@ const ALL_TYPES = [
   "icu_observation",
 ]
 
-function EventRow({ event }: { event: TimelineEvent }) {
+function eventSortKey(time: string | null | undefined): string {
+  return time ?? ""
+}
+
+function EventRow({
+  event,
+  showUnmatchedStayBadge = false,
+}: {
+  event: TimelineEvent
+  showUnmatchedStayBadge?: boolean
+}) {
   const [open, setOpen] = useState(false)
+  const stayBadge =
+    showUnmatchedStayBadge && event.stay_id != null ? (
+      <Badge variant="secondary">ICU Stay {event.stay_id}</Badge>
+    ) : null
+
   if (event.band_key && event.band_events) {
     return (
       <Collapsible open={open} onOpenChange={setOpen}>
         <div className="grid gap-1 border-b py-3 md:grid-cols-[10rem_7rem_1fr]">
           <div className="font-mono text-xs text-muted-foreground">{event.time ?? "—"}</div>
-          <div>
+          <div className="flex flex-wrap gap-1">
             <Badge variant="outline">{event.event_type}</Badge>
+            {stayBadge}
           </div>
           <div className="space-y-1">
             <CollapsibleTrigger className="text-left text-sm font-medium underline-offset-4 hover:underline">
@@ -59,8 +79,9 @@ function EventRow({ event }: { event: TimelineEvent }) {
   return (
     <div className="grid gap-1 border-b py-3 md:grid-cols-[10rem_7rem_1fr]">
       <div className="font-mono text-xs text-muted-foreground">{event.time ?? "—"}</div>
-      <div>
+      <div className="flex flex-wrap gap-1">
         <Badge variant="outline">{event.event_type}</Badge>
+        {stayBadge}
       </div>
       <div className="space-y-1">
         <div className="text-sm font-medium">
@@ -73,6 +94,115 @@ function EventRow({ event }: { event: TimelineEvent }) {
       </div>
     </div>
   )
+}
+
+function IcuStayIntervalBlock({
+  stay,
+  events,
+}: {
+  stay: IcuStayInterval
+  events: TimelineEvent[]
+}) {
+  const [open, setOpen] = useState(true)
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="my-2 rounded-lg border bg-muted/40">
+        <div className="grid gap-1 border-b px-3 py-3 md:grid-cols-[10rem_7rem_1fr]">
+          <div className="font-mono text-xs text-muted-foreground">
+            {stay.intime ?? "—"}
+            {stay.outtime ? (
+              <>
+                <br />→ {stay.outtime}
+              </>
+            ) : null}
+          </div>
+          <div>
+            <Badge>ICU Stay</Badge>
+          </div>
+          <div className="space-y-1">
+            <CollapsibleTrigger className="text-left text-sm font-medium underline-offset-4 hover:underline">
+              ICU Stay {stay.stay_id}: {stay.first_careunit ?? "—"} →{" "}
+              {stay.last_careunit ?? "—"} · LOS {stay.los?.toFixed(2) ?? "—"}d
+              {events.length ? ` · ${events.length} events` : ""}
+            </CollapsibleTrigger>
+            <ProvenanceChip provenance={stay.provenance} />
+          </div>
+        </div>
+        <CollapsibleContent>
+          <div className="border-l-2 border-foreground/20 pl-3 ml-2">
+            {events.length === 0 ? (
+              <p className="py-3 text-xs text-muted-foreground">
+                No Timeline Events associated with this ICU Stay in the current
+                filter.
+              </p>
+            ) : (
+              events.map((ev, i) => (
+                <EventRow
+                  key={`${ev.event_type}-${ev.time}-${i}`}
+                  event={ev}
+                />
+              ))
+            )}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  )
+}
+
+type TimelineItem =
+  | {
+      kind: "event"
+      time: string
+      event: TimelineEvent
+      unmatchedStayId: boolean
+    }
+  | { kind: "stay"; time: string; stay: IcuStayInterval; events: TimelineEvent[] }
+
+function buildTimelineItems(
+  events: TimelineEvent[],
+  stays: IcuStayInterval[]
+): TimelineItem[] {
+  const stayIds = new Set(stays.map((s) => s.stay_id))
+  const byStay = new Map<number, TimelineEvent[]>()
+  for (const s of stays) byStay.set(s.stay_id, [])
+
+  const root: TimelineEvent[] = []
+  for (const ev of events) {
+    if (ev.stay_id != null && stayIds.has(ev.stay_id)) {
+      byStay.get(ev.stay_id)!.push(ev)
+    } else {
+      root.push(ev)
+    }
+  }
+
+  for (const list of byStay.values()) {
+    list.sort((a, b) => eventSortKey(a.time).localeCompare(eventSortKey(b.time)))
+  }
+
+  const items: TimelineItem[] = [
+    ...root.map((event) => ({
+      kind: "event" as const,
+      time: eventSortKey(event.time),
+      event,
+      unmatchedStayId: event.stay_id != null,
+    })),
+    ...stays.map((stay) => ({
+      kind: "stay" as const,
+      time: eventSortKey(stay.intime),
+      stay,
+      events: byStay.get(stay.stay_id) ?? [],
+    })),
+  ]
+
+  items.sort((a, b) => {
+    const cmp = a.time.localeCompare(b.time)
+    if (cmp !== 0) return cmp
+    if (a.kind !== b.kind) return a.kind === "stay" ? -1 : 1
+    return 0
+  })
+
+  return items
 }
 
 export function TimelineView({
@@ -108,9 +238,9 @@ export function TimelineView({
     )
   }
 
-  const icuNote = useMemo(() => {
-    if (!query.data?.icu_stays.length) return null
-    return query.data.icu_stays
+  const items = useMemo(() => {
+    if (!query.data) return []
+    return buildTimelineItems(query.data.events, query.data.icu_stays)
   }, [query.data])
 
   return (
@@ -159,26 +289,6 @@ export function TimelineView({
           ))}
         </div>
 
-        {icuNote ? (
-          <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
-            <p className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
-              ICU Stays (nested intervals)
-            </p>
-            {icuNote.map((s) => (
-              <div key={s.stay_id} className="text-sm">
-                <div>
-                  stay {s.stay_id}: {s.first_careunit} → {s.last_careunit} · LOS{" "}
-                  {s.los?.toFixed(2) ?? "—"}d
-                </div>
-                <div className="font-mono text-xs text-muted-foreground">
-                  {s.intime} → {s.outtime}
-                </div>
-                <ProvenanceChip provenance={s.provenance} />
-              </div>
-            ))}
-          </div>
-        ) : null}
-
         {query.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading timeline…</p>
         ) : query.error ? (
@@ -187,10 +297,25 @@ export function TimelineView({
           <div>
             <p className="mb-2 text-sm text-muted-foreground">
               {query.data?.events.length ?? 0} Timeline Events
+              {query.data?.icu_stays.length
+                ? ` · ${query.data.icu_stays.length} ICU Stay interval${query.data.icu_stays.length === 1 ? "" : "s"}`
+                : ""}
             </p>
-            {query.data?.events.map((ev, i) => (
-              <EventRow key={`${ev.event_type}-${ev.time}-${i}`} event={ev} />
-            ))}
+            {items.map((item, i) =>
+              item.kind === "stay" ? (
+                <IcuStayIntervalBlock
+                  key={`stay-${item.stay.stay_id}`}
+                  stay={item.stay}
+                  events={item.events}
+                />
+              ) : (
+                <EventRow
+                  key={`${item.event.event_type}-${item.event.time}-${i}`}
+                  event={item.event}
+                  showUnmatchedStayBadge={item.unmatchedStayId}
+                />
+              )
+            )}
           </div>
         )}
       </div>
