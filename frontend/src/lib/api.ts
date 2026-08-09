@@ -135,10 +135,11 @@ export type ExampleQuestion = {
 }
 
 export const api = {
-  health: () => request<{ status: string; patient_count: number; egress_note: string }>("/health"),
-  safetyNotice: () => request<{ notice: string }>("/meta/safety-notice"),
-  patients: () => request<PatientSummary[]>("/patients"),
-  patient: (subjectId: number) => request<PatientDetail>(`/patients/${subjectId}`),
+  health: () =>
+    request<{ status: string; patient_count: number; egress_note: string }>("/api/health"),
+  safetyNotice: () => request<{ notice: string }>("/api/meta/safety-notice"),
+  patients: () => request<PatientSummary[]>("/api/patients"),
+  patient: (subjectId: number) => request<PatientDetail>(`/api/patients/${subjectId}`),
   timeline: (
     subjectId: number,
     hadmId: number,
@@ -150,13 +151,15 @@ export const api = {
     if (params?.end) q.set("end", params.end)
     const qs = q.toString()
     return request<TimelineResponse>(
-      `/patients/${subjectId}/admissions/${hadmId}/timeline${qs ? `?${qs}` : ""}`
+      `/api/patients/${subjectId}/admissions/${hadmId}/timeline${qs ? `?${qs}` : ""}`
     )
   },
   billing: (subjectId: number, hadmId: number) =>
-    request<BillingContext>(`/patients/${subjectId}/admissions/${hadmId}/billing-context`),
+    request<BillingContext>(
+      `/api/patients/${subjectId}/admissions/${hadmId}/billing-context`
+    ),
   qa: (body: { question: string; subject_id: number; hadm_id?: number | null }) =>
-    request<QaResponse>("/qa", { method: "POST", body: JSON.stringify(body) }),
-  qaExamples: () => request<ExampleQuestion[]>("/qa/examples"),
-  eventTypes: () => request<string[]>("/meta/event-types"),
+    request<QaResponse>("/api/qa", { method: "POST", body: JSON.stringify(body) }),
+  qaExamples: () => request<ExampleQuestion[]>("/api/qa/examples"),
+  eventTypes: () => request<string[]>("/api/meta/event-types"),
 }

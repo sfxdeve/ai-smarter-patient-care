@@ -71,8 +71,11 @@ def answer_question(
 
     assert isinstance(result, TemplateChoice)
     slots = dict(result.slots)
+    # Request context wins over LLM/keyword slot junk (e.g. hadm_id="").
     if hadm_id is not None:
-        slots.setdefault("hadm_id", hadm_id)
+        slots["hadm_id"] = hadm_id
+    elif slots.get("hadm_id") in ("", None):
+        slots.pop("hadm_id", None)
 
     try:
         tr = run_template(con, result.template_id, subject_id, hadm_id, slots)

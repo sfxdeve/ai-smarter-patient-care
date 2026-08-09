@@ -211,7 +211,7 @@ def evaluate_interpreter(name: str, gold: list[dict[str, Any]], make_interp) -> 
         app.state.interpreter = make_interp(item)
         with TestClient(app) as client:
             res = client.post(
-                "/qa",
+                "/api/qa",
                 json={
                     "question": item["question"],
                     "subject_id": item["subject_id"],

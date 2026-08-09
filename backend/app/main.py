@@ -26,10 +26,11 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(patients.router)
-    app.include_router(qa.router)
+    # All HTTP API lives under /api so SPA routes like /patients/:id are not stolen.
+    app.include_router(patients.router, prefix="/api")
+    app.include_router(qa.router, prefix="/api")
 
-    @app.get("/health", response_model=HealthResponse)
+    @app.get("/api/health", response_model=HealthResponse)
     def health() -> HealthResponse:
         con = get_shared_connection()
         row = fetchone_dict(con, "SELECT COUNT(*) AS n FROM patients")
@@ -42,7 +43,7 @@ def create_app() -> FastAPI:
             interpreter=settings.interpreter,
         )
 
-    @app.get("/meta/safety-notice")
+    @app.get("/api/meta/safety-notice")
     def safety_notice() -> dict[str, str]:
         return {"notice": SAFETY_NOTICE}
 

@@ -23,7 +23,7 @@ make up                # fetches demo data if needed, then docker compose up --b
 ```
 
 - UI: http://localhost:5173  
-- API: http://localhost:8000/health  
+- API: http://localhost:8000/api/health  
 
 ### Local dev (without Docker)
 

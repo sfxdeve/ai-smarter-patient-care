@@ -43,19 +43,19 @@ def _client_with(interpreter: Any, *, raise_server_exceptions: bool = True) -> T
 
 
 def _patient_with_emar(client: TestClient) -> tuple[int, int]:
-    for p in client.get("/patients").json():
+    for p in client.get("/api/patients").json():
         emar = next(c for c in p["coverage"] if c["table"] == "emar")
         if emar["has_rows"]:
-            detail = client.get(f"/patients/{p['subject_id']}").json()
+            detail = client.get(f"/api/patients/{p['subject_id']}").json()
             return p["subject_id"], detail["admissions"][0]["hadm_id"]
     raise AssertionError("expected a Patient with eMAR coverage")
 
 
 def _patient_without_emar(client: TestClient) -> tuple[int, int]:
-    for p in client.get("/patients").json():
+    for p in client.get("/api/patients").json():
         emar = next(c for c in p["coverage"] if c["table"] == "emar")
         if not emar["has_rows"]:
-            detail = client.get(f"/patients/{p['subject_id']}").json()
+            detail = client.get(f"/api/patients/{p['subject_id']}").json()
             return p["subject_id"], detail["admissions"][0]["hadm_id"]
     raise AssertionError("expected a Patient without eMAR coverage")
 
@@ -63,7 +63,7 @@ def _patient_without_emar(client: TestClient) -> tuple[int, int]:
 def test_grounded_answer_with_provenance(client: TestClient) -> None:
     sid, hadm = _patient_with_emar(client)
     res = client.post(
-        "/qa",
+        "/api/qa",
         json={"question": "How many transfers during this admission?", "subject_id": sid, "hadm_id": hadm},
     )
     assert res.status_code == 200
@@ -88,7 +88,7 @@ def test_no_data_answer_includes_coverage_for_patient_without_emar(client: TestC
     )
     with TestClient(app) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": "Was heparin administered?", "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -104,7 +104,7 @@ def test_no_data_answer_includes_coverage_for_patient_without_emar(client: TestC
 def test_abstention_no_template(client: TestClient) -> None:
     sid, hadm = _patient_with_emar(client)
     res = client.post(
-        "/qa",
+        "/api/qa",
         json={"question": "What is the patient's favorite color?", "subject_id": sid, "hadm_id": hadm},
     )
     assert res.status_code == 200
@@ -116,7 +116,7 @@ def test_abstention_no_template(client: TestClient) -> None:
 def test_abstention_clinical_advice(client: TestClient) -> None:
     sid, hadm = _patient_with_emar(client)
     res = client.post(
-        "/qa",
+        "/api/qa",
         json={
             "question": "What treatment should I give this patient?",
             "subject_id": sid,
@@ -140,7 +140,7 @@ def test_llm_no_template_abstain_never_reroutes_to_keyword(client: TestClient) -
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -162,7 +162,7 @@ def test_llm_clinical_advice_abstain_never_reroutes_to_keyword(client: TestClien
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "What treatment should I give this patient?",
                 "subject_id": sid,
@@ -181,7 +181,7 @@ def test_llm_transport_failure_uses_keyword_rescue(client: TestClient) -> None:
     interp = _ScriptedInterpreter("llm", error=RuntimeError("LLM API unreachable"))
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "How many transfers during this admission?",
                 "subject_id": sid,
@@ -200,7 +200,7 @@ def test_fake_primary_transport_failure_does_not_rescue(client: TestClient) -> N
     interp = _ScriptedInterpreter("fake", error=RuntimeError("fake boom"))
     with _client_with(interp, raise_server_exceptions=False) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "How many transfers during this admission?",
                 "subject_id": sid,
@@ -217,7 +217,7 @@ def test_keyword_primary_transport_failure_does_not_rescue(client: TestClient) -
     interp = _ScriptedInterpreter("keyword", error=RuntimeError("keyword boom"))
     with _client_with(interp, raise_server_exceptions=False) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "How many transfers during this admission?",
                 "subject_id": sid,
@@ -236,7 +236,7 @@ def test_bad_slots_return_http_400_not_abstention(client: TestClient) -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "Show lab trend without label",
                 "subject_id": sid,
@@ -257,7 +257,7 @@ def test_unknown_template_execution_returns_http_400(client: TestClient) -> None
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={
                 "question": "Force unknown template",
                 "subject_id": sid,
@@ -272,7 +272,7 @@ def test_unknown_template_execution_returns_http_400(client: TestClient) -> None
 
 def test_unknown_patient_rejected(client: TestClient) -> None:
     res = client.post(
-        "/qa",
+        "/api/qa",
         json={"question": "How many transfers?", "subject_id": 999999999, "hadm_id": 1},
     )
     assert res.status_code == 400
@@ -308,7 +308,7 @@ def test_vitals_summary_grounded_with_honest_provenance() -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -336,7 +336,7 @@ def test_vitals_summary_zero_rows_is_no_data_with_chartevents_coverage() -> None
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -361,7 +361,7 @@ def test_procedures_grounded_from_hosp_and_icu_with_honest_provenance() -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -395,7 +395,7 @@ def test_procedures_zero_rows_is_no_data_with_coverage() -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -423,7 +423,7 @@ def test_event_ordering_zero_match_is_no_data_with_coverage() -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -455,7 +455,7 @@ def test_event_ordering_multi_match_uses_earliest_with_dual_provenance() -> None
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -491,7 +491,7 @@ def test_event_ordering_resolves_beyond_labs_and_meds() -> None:
     )
     with _client_with(interp) as c:
         res = c.post(
-            "/qa",
+            "/api/qa",
             json={"question": question, "subject_id": sid, "hadm_id": hadm},
         )
     assert res.status_code == 200
@@ -507,8 +507,39 @@ def test_event_ordering_resolves_beyond_labs_and_meds() -> None:
     assert "earliest" in body["summary"].lower()
 
 
+def test_event_ordering_ignores_empty_string_hadm_slot_and_no_data_when_side_missing() -> None:
+    """LLM may send hadm_id=''; must not INT64-crash; missing side → No-Data."""
+    # Admission without heparin administrations (browser F2b case pattern).
+    sid, hadm = 10000032, 29079034
+    question = "Did the first creatinine lab happen before the first heparin administration?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(
+            template_id="event_ordering",
+            slots={
+                "event_a": "creatinine",
+                "event_b": "heparin",
+                "hadm_id": "",
+            },
+        ),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/api/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["kind"] in ("grounded", "no_data")
+    assert body["kind"] != "abstention"
+    assert "Could not convert" not in body.get("summary", "")
+    assert "INT64" not in body.get("summary", "")
+    if body["kind"] == "no_data":
+        assert body["coverage"]
+
+
 def test_qa_examples(client: TestClient) -> None:
-    res = client.get("/qa/examples")
+    res = client.get("/api/qa/examples")
     assert res.status_code == 200
     body = res.json()
     assert len(body) >= 10
@@ -533,7 +564,7 @@ def test_qa_examples(client: TestClient) -> None:
 
 
 def test_health(client: TestClient) -> None:
-    res = client.get("/health")
+    res = client.get("/api/health")
     assert res.status_code == 200
     body = res.json()
     assert body["patient_count"] == 100

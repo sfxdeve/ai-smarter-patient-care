@@ -21,10 +21,7 @@ export default defineConfig({
       clientPort: 5173,
     },
     proxy: {
-      "/patients": "http://127.0.0.1:8000",
-      "/qa": "http://127.0.0.1:8000",
-      "/health": "http://127.0.0.1:8000",
-      "/meta": "http://127.0.0.1:8000",
+      "/api": "http://127.0.0.1:8000",
     },
   },
 })

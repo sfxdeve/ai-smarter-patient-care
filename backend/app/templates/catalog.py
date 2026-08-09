@@ -41,11 +41,41 @@ def _prov(table: str, field: str, row_id: Any, time: Any = None) -> Provenance:
     )
 
 
+def _coerce_optional_int(value: Any) -> int | None:
+    """Normalize slot values that should be int|None (reject '' which breaks DuckDB INT64)."""
+    if value is None:
+        return None
+    if isinstance(value, str) and value.strip() == "":
+        return None
+    if isinstance(value, bool):
+        raise ValueError(f"invalid integer: {value!r}")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError as exc:
+            raise ValueError(f"invalid integer: {value!r}") from exc
+    try:
+        return int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"invalid integer: {value!r}") from exc
+
+
 def _bind_context(slots: dict[str, Any], subject_id: int, hadm_id: int | None) -> dict[str, Any]:
     bound = dict(slots)
-    bound["subject_id"] = subject_id
+    bound["subject_id"] = int(subject_id)
+    # Request context wins; never leave "" in bound hadm_id for SQL.
     if hadm_id is not None:
-        bound.setdefault("hadm_id", hadm_id)
+        bound["hadm_id"] = int(hadm_id)
+    elif "hadm_id" in bound:
+        coerced = _coerce_optional_int(bound.get("hadm_id"))
+        if coerced is None:
+            bound.pop("hadm_id", None)
+        else:
+            bound["hadm_id"] = coerced
     return bound
 
 
@@ -757,7 +787,15 @@ def run_counts(
             "icustays",
             "intime",
         ),
+        "admissions": (
+            "SELECT hadm_id AS row_id, CAST(admittime AS VARCHAR) AS event_time, admission_type AS label FROM admissions WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)",
+            "admissions",
+            "admittime",
+        ),
     }
+    # Synonyms for natural "how many admissions" questions.
+    if target in ("admission", "hospitalizations", "stays"):
+        target = "admissions"
     if target not in table_sql:
         raise ValueError(f"Unsupported count_target: {target}")
     detail_sql, table, time_field = table_sql[target]

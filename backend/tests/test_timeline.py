@@ -4,16 +4,16 @@ from fastapi.testclient import TestClient
 
 
 def _first_admission(client: TestClient) -> tuple[int, int]:
-    patients = client.get("/patients").json()
+    patients = client.get("/api/patients").json()
     sid = patients[0]["subject_id"]
-    detail = client.get(f"/patients/{sid}").json()
+    detail = client.get(f"/api/patients/{sid}").json()
     hadm = detail["admissions"][0]["hadm_id"]
     return sid, hadm
 
 
 def test_timeline_has_events_and_provenance(client: TestClient) -> None:
     sid, hadm = _first_admission(client)
-    res = client.get(f"/patients/{sid}/admissions/{hadm}/timeline")
+    res = client.get(f"/api/patients/{sid}/admissions/{hadm}/timeline")
     assert res.status_code == 200
     body = res.json()
     assert body["subject_id"] == sid
@@ -31,7 +31,7 @@ def test_timeline_has_events_and_provenance(client: TestClient) -> None:
 
 def test_billing_context_untimed(client: TestClient) -> None:
     sid, hadm = _first_admission(client)
-    res = client.get(f"/patients/{sid}/admissions/{hadm}/billing-context")
+    res = client.get(f"/api/patients/{sid}/admissions/{hadm}/billing-context")
     assert res.status_code == 200
     body = res.json()
     assert "untimed" in body["notice"].lower() or "Billing Context" in body["notice"]
@@ -42,7 +42,7 @@ def test_billing_context_untimed(client: TestClient) -> None:
 def test_timeline_rejects_bad_window(client: TestClient) -> None:
     sid, hadm = _first_admission(client)
     res = client.get(
-        f"/patients/{sid}/admissions/{hadm}/timeline",
+        f"/api/patients/{sid}/admissions/{hadm}/timeline",
         params={"start": "2200-01-02", "end": "2200-01-01"},
     )
     assert res.status_code == 400
@@ -51,7 +51,7 @@ def test_timeline_rejects_bad_window(client: TestClient) -> None:
 def test_timeline_filter_event_types(client: TestClient) -> None:
     sid, hadm = _first_admission(client)
     res = client.get(
-        f"/patients/{sid}/admissions/{hadm}/timeline",
+        f"/api/patients/{sid}/admissions/{hadm}/timeline",
         params={"event_types": "transfer"},
     )
     assert res.status_code == 200
@@ -61,13 +61,13 @@ def test_timeline_filter_event_types(client: TestClient) -> None:
 
 def test_icu_observation_bands_expandable(client: TestClient) -> None:
     # Find an admission with ICU observations
-    patients = client.get("/patients").json()
+    patients = client.get("/api/patients").json()
     found = False
     for p in patients[:20]:
-        detail = client.get(f"/patients/{p['subject_id']}").json()
+        detail = client.get(f"/api/patients/{p['subject_id']}").json()
         for adm in detail["admissions"]:
             res = client.get(
-                f"/patients/{p['subject_id']}/admissions/{adm['hadm_id']}/timeline",
+                f"/api/patients/{p['subject_id']}/admissions/{adm['hadm_id']}/timeline",
                 params={"event_types": "icu_observation"},
             )
             events = res.json()["events"]

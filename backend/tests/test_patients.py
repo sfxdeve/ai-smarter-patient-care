@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 
 def test_list_patients_returns_100(client: TestClient) -> None:
-    res = client.get("/patients")
+    res = client.get("/api/patients")
     assert res.status_code == 200
     patients = res.json()
     assert len(patients) == 100
@@ -16,9 +16,9 @@ def test_list_patients_returns_100(client: TestClient) -> None:
 
 def test_get_patient_with_admissions(client: TestClient) -> None:
     # Known demo patient — pick first from list
-    patients = client.get("/patients").json()
+    patients = client.get("/api/patients").json()
     sid = patients[0]["subject_id"]
-    res = client.get(f"/patients/{sid}")
+    res = client.get(f"/api/patients/{sid}")
     assert res.status_code == 200
     body = res.json()
     assert body["subject_id"] == sid
@@ -31,12 +31,12 @@ def test_get_patient_with_admissions(client: TestClient) -> None:
 
 
 def test_unknown_patient_404(client: TestClient) -> None:
-    res = client.get("/patients/999999999")
+    res = client.get("/api/patients/999999999")
     assert res.status_code == 404
 
 
 def test_emar_coverage_is_65_of_100(client: TestClient) -> None:
-    patients = client.get("/patients").json()
+    patients = client.get("/api/patients").json()
     with_emar = sum(
         1
         for p in patients
