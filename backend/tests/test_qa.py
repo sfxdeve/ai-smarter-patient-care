@@ -289,6 +289,68 @@ def test_keyword_baseline_behavioral() -> None:
     assert a.trigger == "clinical_advice"
 
 
+_VITAL_LABELS = {
+    "Heart Rate",
+    "Respiratory Rate",
+    "O2 saturation pulseoxymetry",
+    "Non Invasive Blood Pressure systolic",
+    "Non Invasive Blood Pressure diastolic",
+}
+
+
+def test_vitals_summary_grounded_with_honest_provenance() -> None:
+    """In-scope vitals → grounded; every Provenance points at a real chartevents row."""
+    sid, hadm = 10039708, 28258130
+    question = "Summarize heart rate and respiratory rate for this admission."
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(template_id="vitals_summary", slots={}),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "grounded"
+    assert body["template_id"] == "vitals_summary"
+    assert body["provenance"], "expected non-empty provenance from source rows"
+    for p in body["provenance"]:
+        assert p["table"] == "chartevents"
+        assert p["field"]
+        assert p["row_id"] is not None
+        assert p["time"]
+        # Labels must not stand in as row identifiers
+        assert str(p["row_id"]) not in _VITAL_LABELS
+        assert ":" in str(p["row_id"]), "chartevents row_id should be composite stay_id:itemid:charttime"
+
+
+def test_vitals_summary_zero_rows_is_no_data_with_chartevents_coverage() -> None:
+    """Zero matching vitals window → No-Data Answer with chartevents coverage."""
+    sid, hadm = 10000032, 22595853
+    question = "Summarize heart rate and respiratory rate for this admission."
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(template_id="vitals_summary", slots={}),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "no_data"
+    assert body["template_id"] == "vitals_summary"
+    assert body["rows"] == []
+    assert body["provenance"] == []
+    assert body["coverage"]
+    assert body["coverage"][0]["table"] == "chartevents"
+    assert "no" != body["summary"].strip().lower()
+    assert "No-Data" in body["summary"] or "zero rows" in body["summary"].lower()
+
+
 def test_qa_examples(client: TestClient) -> None:
     res = client.get("/qa/examples")
     assert res.status_code == 200

@@ -212,10 +212,8 @@ def run_vitals_summary(
 ) -> TemplateResult:
     bound = _bind_context(slots, subject_id, hadm_id)
     sql = """
-    SELECT d.label, COUNT(*) AS n,
-           MIN(c.valuenum) AS min_val, MAX(c.valuenum) AS max_val, AVG(c.valuenum) AS avg_val,
-           MIN(CAST(c.charttime AS VARCHAR)) AS first_time,
-           MAX(CAST(c.charttime AS VARCHAR)) AS last_time
+    SELECT c.stay_id, c.itemid, CAST(c.charttime AS VARCHAR) AS charttime,
+           c.valuenum, c.valueuom, d.label
     FROM chartevents c
     JOIN d_items d ON c.itemid = d.itemid
     WHERE c.subject_id = ? AND (? IS NULL OR c.hadm_id = ?)
@@ -223,10 +221,10 @@ def run_vitals_summary(
         'Heart Rate', 'Respiratory Rate', 'O2 saturation pulseoxymetry',
         'Non Invasive Blood Pressure systolic', 'Non Invasive Blood Pressure diastolic'
       )
+      AND c.valuenum IS NOT NULL
       AND (? IS NULL OR c.charttime >= CAST(? AS TIMESTAMP))
       AND (? IS NULL OR c.charttime <= CAST(? AS TIMESTAMP))
-    GROUP BY d.label
-    ORDER BY d.label
+    ORDER BY c.charttime, d.label
     """
     start = bound.get("start")
     end = bound.get("end")
@@ -239,9 +237,42 @@ def run_vitals_summary(
         end,
         end,
     ]
-    rows = fetchall_dicts(con, sql, params)
-    prov = [_prov("chartevents", "valuenum", r["label"], r["first_time"]) for r in rows]
-    return TemplateResult(rows=rows, provenance=prov, sql=sql.strip(), coverage_table="chartevents")
+    detail = fetchall_dicts(con, sql, params)
+    if not detail:
+        return TemplateResult(rows=[], provenance=[], sql=sql.strip(), coverage_table="chartevents")
+
+    by_label: dict[str, list[dict[str, Any]]] = {}
+    for r in detail:
+        by_label.setdefault(r["label"], []).append(r)
+
+    summary: list[dict[str, Any]] = []
+    for label in sorted(by_label):
+        vals = [float(r["valuenum"]) for r in by_label[label]]
+        times = [r["charttime"] for r in by_label[label]]
+        summary.append(
+            {
+                "role": "summary",
+                "label": label,
+                "n": len(vals),
+                "min_val": min(vals),
+                "max_val": max(vals),
+                "avg_val": sum(vals) / len(vals),
+                "first_time": min(times),
+                "last_time": max(times),
+            }
+        )
+
+    out_rows = summary + [{"role": "contributor", **r} for r in detail]
+    prov = [
+        _prov(
+            "chartevents",
+            "valuenum",
+            f"{r['stay_id']}:{r['itemid']}:{r['charttime']}",
+            r["charttime"],
+        )
+        for r in detail
+    ]
+    return TemplateResult(rows=out_rows, provenance=prov, sql=sql.strip(), coverage_table="chartevents")
 
 
 def run_first_last(
