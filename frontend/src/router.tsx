@@ -5,8 +5,9 @@ import {
   createRouter,
 } from "@tanstack/react-router"
 
-import { AppShell } from "@/components/layout"
-import { PatientDetailPage } from "@/routes/patient-detail"
+import { AppShell } from "@/components/app-shell"
+import { AdmissionPage } from "@/routes/admission"
+import { PatientPage } from "@/routes/patient"
 import { PatientsPage } from "@/routes/patients"
 
 const rootRoute = createRootRoute({
@@ -28,11 +29,24 @@ const patientRoute = createRoute({
   path: "/patients/$subjectId",
   component: function PatientRoute() {
     const { subjectId } = patientRoute.useParams()
-    return <PatientDetailPage subjectId={Number(subjectId)} />
+    return <PatientPage subjectId={subjectId} />
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, patientRoute])
+const admissionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/patients/$subjectId/admissions/$hadmId",
+  component: function AdmissionRoute() {
+    const { subjectId, hadmId } = admissionRoute.useParams()
+    return <AdmissionPage subjectId={subjectId} hadmId={hadmId} />
+  },
+})
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  patientRoute,
+  admissionRoute,
+])
 
 export const router = createRouter({ routeTree })
 
