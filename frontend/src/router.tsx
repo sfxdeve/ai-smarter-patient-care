@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router"
 
 import { AppShell } from "@/components/app-shell"
+import { validateAdmissionSearch } from "@/lib/admission-search"
 import { AdmissionPage } from "@/routes/admission"
 import { PatientPage } from "@/routes/patient"
 import { PatientsPage } from "@/routes/patients"
@@ -36,9 +37,13 @@ const patientRoute = createRoute({
 const admissionRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/patients/$subjectId/admissions/$hadmId",
+  validateSearch: validateAdmissionSearch,
   component: function AdmissionRoute() {
     const { subjectId, hadmId } = admissionRoute.useParams()
-    return <AdmissionPage subjectId={subjectId} hadmId={hadmId} />
+    const search = admissionRoute.useSearch()
+    return (
+      <AdmissionPage subjectId={subjectId} hadmId={hadmId} search={search} />
+    )
   },
 })
 
