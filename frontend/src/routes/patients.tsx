@@ -28,7 +28,7 @@ export function PatientsPage() {
       <div>
         <h1 className="font-heading text-2xl font-semibold">Patients</h1>
         <p className="text-sm text-muted-foreground">
-          {data.length} deidentified subjects from the MIMIC-IV Demo. eMAR medication coverage is
+          {data.length} deidentified patients from the MIMIC-IV Demo. eMAR medication coverage is
           present for 65 of 100.
         </p>
       </div>

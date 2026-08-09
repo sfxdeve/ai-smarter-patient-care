@@ -36,17 +36,27 @@ export function QaPanel({
   return (
     <div className="space-y-4 rounded-lg border p-4">
       <div>
-        <h3 className="font-heading text-lg font-semibold">Ask the record</h3>
+        <h3 className="font-heading text-lg font-semibold">
+          Ask the record
+          {hadmId != null ? ` · Admission ${hadmId}` : " · Patient"}
+        </h3>
         <p className="text-sm text-muted-foreground">
           The interpreter sees only schema + Query Templates + your question. Answers are assembled
           from local SQL. AI-phrased text is marked separately from source values.
+          {hadmId == null
+            ? " Questions are scoped to this Patient (no Admission selected)."
+            : " Questions are scoped to the selected Admission."}
         </p>
       </div>
 
       <Textarea
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        placeholder="e.g. How many transfers occurred during this admission?"
+        placeholder={
+          hadmId != null
+            ? "e.g. How many transfers occurred during this admission?"
+            : "e.g. How many admissions does this patient have?"
+        }
         rows={3}
       />
       <div className="flex flex-wrap gap-2">

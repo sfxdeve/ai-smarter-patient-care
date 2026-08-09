@@ -83,6 +83,9 @@ export function PatientDetailPage({ subjectId }: { subjectId: number }) {
         </div>
       </section>
 
+      <Separator />
+      <QaPanel subjectId={subjectId} hadmId={null} />
+
       {activeHadm != null ? (
         <>
           <Separator />
