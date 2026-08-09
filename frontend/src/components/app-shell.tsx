@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-svh bg-background text-foreground">
       <SafetyNotice />
       <header className="border-b">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-4 px-4 py-5">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-4 px-4 py-5">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <Link
@@ -49,8 +49,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <Separator />
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-      <footer className="mx-auto max-w-6xl px-4 py-8 text-xs text-muted-foreground">
+      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
+      <footer className="mx-auto max-w-7xl px-4 py-8 text-xs text-muted-foreground">
         MIMIC-IV Clinical Database Demo v2.2 (PhysioNet, ODbL). Timestamps are
         deidentified and date-shifted. Schema + template catalog + question may
         egress to the configured LLM; never patient rows (ADR 0001).

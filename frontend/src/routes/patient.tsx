@@ -4,6 +4,7 @@ import { AlertCircle } from "lucide-react"
 
 import { PatientOverview } from "@/components/patient-overview"
 import { RouteBreadcrumbs } from "@/components/route-breadcrumbs"
+import { WithQaRail } from "@/components/with-qa-rail"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -115,7 +116,9 @@ export function PatientPage({ subjectId }: { subjectId: string }) {
       ) : null}
 
       {validId && patient.isSuccess ? (
-        <PatientOverview patient={patient.data} />
+        <WithQaRail subjectId={subjectIdNum} hadmId={null}>
+          <PatientOverview patient={patient.data} />
+        </WithQaRail>
       ) : null}
     </div>
   )
