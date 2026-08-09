@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { Info } from "lucide-react"
 
 import { AdmissionTimeline } from "@/components/admission-timeline"
 import {
@@ -12,7 +11,6 @@ import { BillingPanel } from "@/components/billing-panel"
 import type { AdmissionSearch } from "@/lib/admission-search"
 import { RouteBreadcrumbs } from "@/components/route-breadcrumbs"
 import { WithQaRail } from "@/components/with-qa-rail"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
@@ -156,13 +154,12 @@ export function AdmissionPage({
                     : `${chapter.icu_stay_count} ICU Stays`,
                 ].join(" · ")}
               </p>
+              {patient.data.date_shift_note ? (
+                <p className="text-xs text-muted-foreground">
+                  {patient.data.date_shift_note}
+                </p>
+              ) : null}
             </div>
-
-            <Alert>
-              <Info />
-              <AlertTitle>Date-shifted timestamps</AlertTitle>
-              <AlertDescription>{patient.data.date_shift_note}</AlertDescription>
-            </Alert>
 
             <div className="grid gap-8 xl:grid-cols-[1fr_20rem]">
               <AdmissionTimeline

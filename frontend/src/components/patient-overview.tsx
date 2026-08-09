@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, Info } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { EmptyState } from "@/components/async-state"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { AdmissionChapter, PatientDetail, TableCoverage } from "@/lib/api"
 import { formatCoverageBadge } from "@/lib/coverage"
 
@@ -120,31 +119,18 @@ export function PatientOverview({ patient }: { patient: PatientDetail }) {
           Patient {patient.subject_id}
         </h1>
         <p className="text-sm text-muted-foreground">{demographics}</p>
+        {patient.date_shift_note ? (
+          <p className="text-xs text-muted-foreground">{patient.date_shift_note}</p>
+        ) : null}
       </div>
 
-      <Alert>
-        <Info />
-        <AlertTitle>Date-shifted timestamps</AlertTitle>
-        <AlertDescription>{patient.date_shift_note}</AlertDescription>
-      </Alert>
-
       <section className="space-y-3">
-        <div>
-          <h2 className="font-heading text-lg font-semibold">Coverage</h2>
-          <p className="text-sm text-muted-foreground">
-            Table presence for this Patient before opening an Admission.
-          </p>
-        </div>
+        <h2 className="font-heading text-lg font-semibold">Coverage</h2>
         <CoverageBadges coverage={patient.coverage} />
       </section>
 
       <section className="space-y-3">
-        <div>
-          <h2 className="font-heading text-lg font-semibold">Admissions</h2>
-          <p className="text-sm text-muted-foreground">
-            Each Admission is a chapter of the hospital journey.
-          </p>
-        </div>
+        <h2 className="font-heading text-lg font-semibold">Admissions</h2>
 
         {patient.admissions.length === 0 ? (
           <EmptyState

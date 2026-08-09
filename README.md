@@ -64,9 +64,9 @@ Gold Set: ~100 questions (fact, temporal, aggregate, unanswerable). Metrics: str
 
 Routes: `/` → `/patients/$subjectId` → `/patients/$subjectId/admissions/$hadmId`.
 
-1. **Safety / chrome** — Verbatim safety notice on every screen; product name + research-only cue; theme toggle works.  
+1. **Chrome** — Header loads; Patients nav; API offline badge only when down.  
 2. **Patients (`/`)** — Table of 100 Patients; sort columns; filter text; eMAR/coverage badges visible; row opens Patient. Loading skeleton / error+retry / empty filter state behave.  
-3. **Patient overview** — Demographics, coverage, date-shift callout; Admissions as chapter cards linking to Admission URLs; breadcrumbs. Patient-scoped **QA rail** (desktop sticky/resizable; narrow viewport: floating “Ask the record” → **Sheet**).  
+3. **Patient overview** — Demographics, coverage; Admissions as chapter cards linking to Admission URLs; breadcrumbs. Patient-scoped **QA rail** (desktop sticky/resizable; narrow viewport: floating “Ask the record” → **Sheet**).  
 4. **Admission timeline** — Vertical spine chronology; ICU Stay nested bands; events with `stay_id` nested under stay; ICU observation bands collapsed by default, expand → virtualized source rows.  
 5. **URL filters** — Event types + `from`/`to` in search params; list updates; shareable/refresh-safe; invalid window fails loud (Alert).  
 6. **Billing Context** — Labeled panel off the spine (untimed discharge coding); never mixed into timeline events; Provenance chips.  

@@ -137,7 +137,6 @@ export type ExampleQuestion = {
 export const api = {
   health: () =>
     request<{ status: string; patient_count: number; egress_note: string }>("/api/health"),
-  safetyNotice: () => request<{ notice: string }>("/api/meta/safety-notice"),
   patients: () => request<PatientSummary[]>("/api/patients"),
   patient: (subjectId: number) => request<PatientDetail>(`/api/patients/${subjectId}`),
   timeline: (

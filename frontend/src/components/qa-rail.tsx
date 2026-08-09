@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { ChevronDown, CircleHelp, MessageSquareText } from "lucide-react"
+import { ChevronDown, MessageSquareText } from "lucide-react"
 
 import { LoadingBlock, ErrorAlert } from "@/components/async-state"
 import { ProvenanceChip } from "@/components/provenance"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -79,14 +78,14 @@ function AnswerCard({
           >
             {kindLabel(answer.kind)}
           </Badge>
-          <Badge variant="outline">
-            interpreter: {interpreterLabel(answer.interpreter)}
-          </Badge>
-          {answer.interpreter === "keyword_rescue" ? (
-            <Badge variant="secondary">LLM unreachable — keyword baseline</Badge>
+          {answer.interpreter === "keyword_rescue" ||
+          answer.interpreter === "keyword" ? (
+            <Badge variant="outline">
+              {interpreterLabel(answer.interpreter)}
+            </Badge>
           ) : null}
           {answer.template_id ? (
-            <Badge variant="outline">template: {answer.template_id}</Badge>
+            <Badge variant="outline">{answer.template_id}</Badge>
           ) : null}
         </div>
         <CardTitle className="text-sm font-normal leading-snug text-foreground">
@@ -97,32 +96,12 @@ function AnswerCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div
-          className={cn(
-            "rounded-md border border-dashed border-foreground/15 bg-background/60 px-2.5 py-2",
-            "text-sm italic text-foreground/85"
-          )}
-          title="Template summary — presentation chrome, not a source row"
-        >
-          <p className="mb-1 text-[10px] font-medium tracking-wide text-muted-foreground not-italic uppercase">
-            Summary (template phrasing)
-          </p>
-          {answer.summary}
-        </div>
+        <div className="text-sm text-foreground/90">{answer.summary}</div>
 
-        {answer.abstention_reason ? (
-          <Alert>
-            <CircleHelp />
-            <AlertTitle>Why this abstained</AlertTitle>
-            <AlertDescription>{answer.abstention_reason}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        {isNoData ? (
-          <p className="text-sm text-muted-foreground">
-            The matched template ran and returned no rows. This is not a grounded
-            clinical negative — it is a no-data result.
-          </p>
+        {answer.abstention_reason &&
+        answer.abstention_reason !== answer.summary &&
+        !answer.summary.includes(answer.abstention_reason) ? (
+          <p className="text-sm text-muted-foreground">{answer.abstention_reason}</p>
         ) : null}
 
         <Button

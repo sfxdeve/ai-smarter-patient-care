@@ -83,11 +83,9 @@ export function BillingPanel({
         className="sticky top-4 max-h-[calc(100svh-7rem)] overflow-y-auto"
       >
         <CardHeader className="border-b">
-          <CardTitle className="text-xs tracking-wide uppercase">
-            Billing Context
-          </CardTitle>
+          <CardTitle className="text-sm">Billing Context</CardTitle>
           <CardDescription className="text-xs">
-            Untimed discharge coding — never Timeline Events on the spine.
+            Untimed discharge coding
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
