@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import { AlertCircle } from "lucide-react"
 
+import {
+  LoadingBlock,
+  EmptyState,
+  ErrorAlert,
+} from "@/components/async-state"
 import { ProvenanceChip } from "@/components/provenance"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -11,12 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api, type BillingCode } from "@/lib/api"
@@ -96,50 +92,29 @@ export function BillingPanel({
         </CardHeader>
         <CardContent className="space-y-4">
           {billing.isPending ? (
-            <div
-              className="space-y-3"
-              aria-busy="true"
-              aria-label="Loading Billing Context"
-            >
+            <LoadingBlock label="Loading Billing Context">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
-            </div>
+            </LoadingBlock>
           ) : null}
 
           {billing.isError ? (
-            <Alert variant="destructive">
-              <AlertCircle />
-              <AlertTitle>Could not load Billing Context</AlertTitle>
-              <AlertDescription>
-                {billing.error instanceof Error
-                  ? billing.error.message
-                  : "Request failed."}
-              </AlertDescription>
-              <div className="col-start-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void billing.refetch()}
-                >
-                  Retry
-                </Button>
-              </div>
-            </Alert>
+            <ErrorAlert
+              title="Could not load Billing Context"
+              message={billing.error}
+              onRetry={() => void billing.refetch()}
+            />
           ) : null}
 
           {billing.isSuccess ? (
             billing.data.diagnoses.length === 0 &&
             billing.data.drg_codes.length === 0 ? (
-              <Empty className="border py-8">
-                <EmptyHeader>
-                  <EmptyTitle>No Billing Context</EmptyTitle>
-                  <EmptyDescription>
-                    This Admission has no billed ICD diagnoses or DRG codes in
-                    the demo cohort. Absence here is not a timeline gap.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              <EmptyState
+                className="py-8"
+                title="No Billing Context"
+                description="This Admission has no billed ICD diagnoses or DRG codes in the demo cohort. Absence here is not a timeline gap."
+              />
             ) : (
               <div className="space-y-4">
                 <p className="text-xs text-muted-foreground">

@@ -62,15 +62,21 @@ Gold Set: ~100 questions (fact, temporal, aggregate, unanswerable). Metrics: str
 
 ## Manual demo checklist
 
-1. Open the UI — safety notice visible on every screen.  
-2. Browse all 100 Patients; note eMAR coverage badges.  
-3. Open a Patient → Admissions as chapters → expand timeline.  
-4. Confirm ICU Stay intervals, collapsible ICU observation bands, Billing Context panel (untimed).  
-5. Filter by event type / time window; reject invalid windows.  
-6. Ask grounded questions (“How many transfers?”); inspect template, SQL, Provenance.  
-7. Ask a Patient **without** eMAR about medications → No-Data + coverage.  
-8. Ask clinical advice → Abstention.  
-9. Stop the LLM / unset key → keyword rescue labeled in QA panel.  
+Routes: `/` → `/patients/$subjectId` → `/patients/$subjectId/admissions/$hadmId`.
+
+1. **Safety / chrome** — Verbatim safety notice on every screen; product name + research-only cue; theme toggle works.  
+2. **Patients (`/`)** — Table of 100 Patients; sort columns; filter text; eMAR/coverage badges visible; row opens Patient. Loading skeleton / error+retry / empty filter state behave.  
+3. **Patient overview** — Demographics, coverage, date-shift callout; Admissions as chapter cards linking to Admission URLs; breadcrumbs. Patient-scoped **QA rail** (desktop sticky/resizable; narrow viewport: floating “Ask the record” → **Sheet**).  
+4. **Admission timeline** — Vertical spine chronology; ICU Stay nested bands; events with `stay_id` nested under stay; ICU observation bands collapsed by default, expand → virtualized source rows.  
+5. **URL filters** — Event types + `from`/`to` in search params; list updates; shareable/refresh-safe; invalid window fails loud (Alert).  
+6. **Billing Context** — Labeled panel off the spine (untimed discharge coding); never mixed into timeline events; Provenance chips.  
+7. **QA rail** — Example prompts from catalog; submit form; Grounded / No-Data / Abstention visually distinct; AI summary chrome ≠ source rows; inspect template, slots, SQL, Provenance; short in-session history. Admission route scopes `hadm_id`; Patient route has none.  
+8. **No-Data / Abstention** — Patient without eMAR + medication question → No-Data + coverage; clinical advice → Abstention.  
+9. **Keyword rescue** — Stop LLM / unset key → interpreter labeled `keyword_rescue` (or keyword baseline).  
+10. **Provenance** — Chip on timeline events, billing codes, and answer facts → Popover with table/field/row/time; copy works (toast optional).  
+11. **Narrow viewport** — Patient and Admission QA usable via Sheet (not only desktop rail).  
+12. **Async UX** — Shared Skeleton / Empty / destructive Alert + Retry on list, Patient, Admission, timeline, billing, and QA failures.  
+
 
 ## Configuration
 

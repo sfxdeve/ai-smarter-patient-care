@@ -11,15 +11,9 @@ import {
 } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
+import { EmptyState } from "@/components/async-state"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -203,19 +197,15 @@ export function PatientsTable({ patients }: { patients: PatientSummary[] }) {
       </div>
 
       {rows.length === 0 ? (
-        <Empty className="border py-12">
-          <EmptyHeader>
-            <EmptyTitle>No Patients match</EmptyTitle>
-            <EmptyDescription>
-              Clear or broaden the filter to see more of the cohort.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
+        <EmptyState
+          title="No Patients match"
+          description="Clear or broaden the filter to see more of the cohort."
+          action={
             <Button variant="outline" size="sm" onClick={() => setFilter("")}>
               Clear filter
             </Button>
-          </EmptyContent>
-        </Empty>
+          }
+        />
       ) : (
         <Table>
           <TableHeader>

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight, Info } from "lucide-react"
 
+import { EmptyState } from "@/components/async-state"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,13 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { AdmissionChapter, PatientDetail, TableCoverage } from "@/lib/api"
 import { formatCoverageBadge } from "@/lib/coverage"
@@ -153,19 +147,15 @@ export function PatientOverview({ patient }: { patient: PatientDetail }) {
         </div>
 
         {patient.admissions.length === 0 ? (
-          <Empty className="border py-12">
-            <EmptyHeader>
-              <EmptyTitle>No Admissions</EmptyTitle>
-              <EmptyDescription>
-                This Patient has no Admissions in the demo cohort.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
+          <EmptyState
+            title="No Admissions"
+            description="This Patient has no Admissions in the demo cohort."
+            action={
               <Button variant="outline" size="sm" render={<Link to="/" />}>
                 Back to Patients
               </Button>
-            </EmptyContent>
-          </Empty>
+            }
+          />
         ) : (
           <div className="space-y-2">
             {patient.admissions.map((admission, idx) => (

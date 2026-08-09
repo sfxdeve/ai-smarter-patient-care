@@ -1,25 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { AlertCircle } from "lucide-react"
 
+import {
+  LoadingBlock,
+  EmptyState,
+  ErrorAlert,
+} from "@/components/async-state"
 import { PatientOverview } from "@/components/patient-overview"
 import { RouteBreadcrumbs } from "@/components/route-breadcrumbs"
 import { WithQaRail } from "@/components/with-qa-rail"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 
 function PatientOverviewSkeleton() {
   return (
-    <div className="space-y-8" aria-busy="true" aria-label="Loading Patient">
+    <LoadingBlock label="Loading Patient" className="space-y-8">
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-80 max-w-full" />
@@ -39,7 +35,7 @@ function PatientOverviewSkeleton() {
           <Skeleton key={i} className="h-28 w-full" />
         ))}
       </div>
-    </div>
+    </LoadingBlock>
   )
 }
 
@@ -72,47 +68,34 @@ export function PatientPage({ subjectId }: { subjectId: string }) {
       />
 
       {notFound ? (
-        <Empty className="border py-12">
-          <EmptyHeader>
-            <EmptyTitle>Patient not found</EmptyTitle>
-            <EmptyDescription>
-              {!validId
-                ? `“${subjectId}” is not a valid Patient identifier.`
-                : "No Patient matches this identifier in the demo cohort."}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
+        <EmptyState
+          title="Patient not found"
+          description={
+            !validId
+              ? `“${subjectId}” is not a valid Patient identifier.`
+              : "No Patient matches this identifier in the demo cohort."
+          }
+          action={
             <Button variant="outline" size="sm" render={<Link to="/" />}>
               Back to Patients
             </Button>
-          </EmptyContent>
-        </Empty>
+          }
+        />
       ) : null}
 
       {validId && patient.isPending ? <PatientOverviewSkeleton /> : null}
 
       {validId && patient.isError && !isUnknownPatient(patient.error) ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Could not load Patient</AlertTitle>
-          <AlertDescription>
-            {patient.error instanceof Error
-              ? patient.error.message
-              : "Request failed."}
-          </AlertDescription>
-          <div className="col-start-2 mt-2 flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void patient.refetch()}
-            >
-              Retry
-            </Button>
+        <ErrorAlert
+          title="Could not load Patient"
+          message={patient.error}
+          onRetry={() => void patient.refetch()}
+          actions={
             <Button variant="outline" size="sm" render={<Link to="/" />}>
               Back to Patients
             </Button>
-          </div>
-        </Alert>
+          }
+        />
       ) : null}
 
       {validId && patient.isSuccess ? (

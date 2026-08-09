@@ -1,21 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
-import { AlertCircle } from "lucide-react"
 
-import { PatientsTable } from "@/components/patients-table"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
+  LoadingBlock,
+  EmptyState,
+  ErrorAlert,
+} from "@/components/async-state"
+import { PatientsTable } from "@/components/patients-table"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 
 function PatientsTableSkeleton() {
   return (
-    <div className="space-y-3" aria-busy="true" aria-label="Loading Patients">
+    <LoadingBlock label="Loading Patients">
       <div className="flex items-center justify-between gap-3">
         <Skeleton className="h-8 w-full max-w-md" />
         <Skeleton className="h-4 w-24" />
@@ -26,7 +23,7 @@ function PatientsTableSkeleton() {
           <Skeleton key={i} className="h-10 w-full" />
         ))}
       </div>
-    </div>
+    </LoadingBlock>
   )
 }
 
@@ -49,15 +46,18 @@ export function PatientsPage() {
       {patients.isPending ? <PatientsTableSkeleton /> : null}
 
       {patients.isError ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Could not load Patients</AlertTitle>
-          <AlertDescription>
-            {patients.error instanceof Error
-              ? patients.error.message
-              : "Request failed."}
-          </AlertDescription>
-          <div className="col-start-2 mt-2">
+        <ErrorAlert
+          title="Could not load Patients"
+          message={patients.error}
+          onRetry={() => void patients.refetch()}
+        />
+      ) : null}
+
+      {patients.isSuccess && patients.data.length === 0 ? (
+        <EmptyState
+          title="No Patients available"
+          description="The API returned an empty cohort. Confirm demo data is loaded and try again."
+          action={
             <Button
               variant="outline"
               size="sm"
@@ -65,27 +65,8 @@ export function PatientsPage() {
             >
               Retry
             </Button>
-          </div>
-        </Alert>
-      ) : null}
-
-      {patients.isSuccess && patients.data.length === 0 ? (
-        <Empty className="border py-12">
-          <EmptyHeader>
-            <EmptyTitle>No Patients available</EmptyTitle>
-            <EmptyDescription>
-              The API returned an empty cohort. Confirm demo data is loaded and
-              try again.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void patients.refetch()}
-          >
-            Retry
-          </Button>
-        </Empty>
+          }
+        />
       ) : null}
 
       {patients.isSuccess && patients.data.length > 0 ? (

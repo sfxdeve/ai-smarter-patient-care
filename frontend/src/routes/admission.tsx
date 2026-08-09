@@ -1,27 +1,25 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, Info } from "lucide-react"
+import { Info } from "lucide-react"
 
 import { AdmissionTimeline } from "@/components/admission-timeline"
+import {
+  LoadingBlock,
+  EmptyState,
+  ErrorAlert,
+} from "@/components/async-state"
 import { BillingPanel } from "@/components/billing-panel"
 import type { AdmissionSearch } from "@/lib/admission-search"
 import { RouteBreadcrumbs } from "@/components/route-breadcrumbs"
 import { WithQaRail } from "@/components/with-qa-rail"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 
 function AdmissionSkeleton() {
   return (
-    <div className="space-y-6" aria-busy="true" aria-label="Loading Admission">
+    <LoadingBlock label="Loading Admission" className="space-y-6">
       <div className="space-y-2">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-4 w-80 max-w-full" />
@@ -31,7 +29,7 @@ function AdmissionSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <Skeleton key={i} className="h-16 w-full" />
       ))}
-    </div>
+    </LoadingBlock>
   )
 }
 
@@ -98,29 +96,22 @@ export function AdmissionPage({
       />
 
       {notFoundIds || unknownPatient || unknownAdmission ? (
-        <Empty className="border py-12">
-          <EmptyHeader>
-            <EmptyTitle>
-              {unknownAdmission ? "Admission not found" : "Patient not found"}
-            </EmptyTitle>
-            <EmptyDescription>
-              {notFoundIds
-                ? "The URL does not contain valid Patient and Admission identifiers."
-                : unknownPatient
-                  ? "No Patient matches this identifier in the demo cohort."
-                  : `Patient ${subjectId} has no Admission ${hadmId} in the demo cohort.`}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            {unknownAdmission && validIds ? (
+        <EmptyState
+          title={unknownAdmission ? "Admission not found" : "Patient not found"}
+          description={
+            notFoundIds
+              ? "The URL does not contain valid Patient and Admission identifiers."
+              : unknownPatient
+                ? "No Patient matches this identifier in the demo cohort."
+                : `Patient ${subjectId} has no Admission ${hadmId} in the demo cohort.`
+          }
+          action={
+            unknownAdmission && validIds ? (
               <Button
                 variant="outline"
                 size="sm"
                 render={
-                  <Link
-                    to="/patients/$subjectId"
-                    params={{ subjectId }}
-                  />
+                  <Link to="/patients/$subjectId" params={{ subjectId }} />
                 }
               >
                 Back to Patient
@@ -129,35 +120,24 @@ export function AdmissionPage({
               <Button variant="outline" size="sm" render={<Link to="/" />}>
                 Back to Patients
               </Button>
-            )}
-          </EmptyContent>
-        </Empty>
+            )
+          }
+        />
       ) : null}
 
       {validIds && patient.isPending ? <AdmissionSkeleton /> : null}
 
       {validIds && patient.isError && !isUnknownPatient(patient.error) ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Could not load Admission</AlertTitle>
-          <AlertDescription>
-            {patient.error instanceof Error
-              ? patient.error.message
-              : "Request failed."}
-          </AlertDescription>
-          <div className="col-start-2 mt-2 flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void patient.refetch()}
-            >
-              Retry
-            </Button>
+        <ErrorAlert
+          title="Could not load Admission"
+          message={patient.error}
+          onRetry={() => void patient.refetch()}
+          actions={
             <Button variant="outline" size="sm" render={<Link to="/" />}>
               Back to Patients
             </Button>
-          </div>
-        </Alert>
+          }
+        />
       ) : null}
 
       {validIds && patient.isSuccess && chapter ? (

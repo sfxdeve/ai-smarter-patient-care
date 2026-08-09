@@ -1,13 +1,9 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import {
-  AlertCircle,
-  ChevronDown,
-  CircleHelp,
-  MessageSquareText,
-} from "lucide-react"
+import { ChevronDown, CircleHelp, MessageSquareText } from "lucide-react"
 
+import { LoadingBlock, ErrorAlert } from "@/components/async-state"
 import { ProvenanceChip } from "@/components/provenance"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +29,7 @@ import {
 } from "@/components/ui/field"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { api, type QaResponse } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -369,27 +366,23 @@ export function QaRail({
           Example questions
         </p>
         {examples.isPending ? (
-          <p className="text-xs text-muted-foreground">Loading examples…</p>
+          <LoadingBlock label="Loading examples">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </LoadingBlock>
         ) : null}
         {examples.isError ? (
-          <Alert variant="destructive">
-            <AlertCircle />
-            <AlertTitle>Could not load examples</AlertTitle>
-            <AlertDescription>
-              {examples.error instanceof Error
-                ? examples.error.message
-                : "Request failed."}
-            </AlertDescription>
-            <div className="col-start-2 mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => void examples.refetch()}
-              >
-                Retry
-              </Button>
-            </div>
-          </Alert>
+          <ErrorAlert
+            title="Could not load examples"
+            message={examples.error}
+            onRetry={() => void examples.refetch()}
+          />
+        ) : null}
+        {examples.isSuccess && examples.data.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            No catalog examples available for this build.
+          </p>
         ) : null}
         {examples.data?.length ? (
           <ul className="space-y-1.5">
@@ -422,27 +415,14 @@ export function QaRail({
       </div>
 
       {mutation.isError ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Question failed</AlertTitle>
-          <AlertDescription>
-            {mutation.error instanceof Error
-              ? mutation.error.message
-              : "Request failed."}
-          </AlertDescription>
-          <div className="col-start-2 mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const q = form.state.values.question.trim()
-                if (q) mutation.mutate(q)
-              }}
-            >
-              Retry
-            </Button>
-          </div>
-        </Alert>
+        <ErrorAlert
+          title="Question failed"
+          message={mutation.error}
+          onRetry={() => {
+            const q = form.state.values.question.trim()
+            if (q) mutation.mutate(q)
+          }}
+        />
       ) : null}
 
       {latest ? (

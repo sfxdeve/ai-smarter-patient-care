@@ -2,10 +2,14 @@ import { useMemo, useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { useQuery } from "@tanstack/react-query"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { AlertCircle, ChevronDown } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 
+import {
+  LoadingBlock,
+  EmptyState,
+  ErrorAlert,
+} from "@/components/async-state"
 import { ProvenanceChip } from "@/components/provenance"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,12 +18,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import {
   Field,
   FieldDescription,
   FieldError,
@@ -27,7 +25,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   ALL_EVENT_TYPES,
@@ -301,13 +298,7 @@ function buildTimelineItems(
 }
 
 function TimelineSkeleton() {
-  return (
-    <div className="space-y-3" aria-busy="true" aria-label="Loading timeline">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-16 w-full" />
-      ))}
-    </div>
-  )
+  return <LoadingBlock label="Loading timeline" rows={6} />
 }
 
 function TimelineFilters({
@@ -472,11 +463,11 @@ function TimelineFilters({
                 Clear
               </Button>
               {badWindow ? (
-                <Alert variant="destructive" className="w-full">
-                  <AlertCircle />
-                  <AlertTitle>Invalid time window</AlertTitle>
-                  <AlertDescription>{badWindow}</AlertDescription>
-                </Alert>
+                <ErrorAlert
+                  className="w-full"
+                  title="Invalid time window"
+                  message={badWindow}
+                />
               ) : null}
             </div>
           )
@@ -535,22 +526,14 @@ export function AdmissionTimeline({
       />
 
       {clientWindowError ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Invalid time window</AlertTitle>
-          <AlertDescription>{clientWindowError}</AlertDescription>
-        </Alert>
+        <ErrorAlert title="Invalid time window" message={clientWindowError} />
       ) : null}
 
       {!clientWindowError && selectedTypes.length === 0 ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>No event types selected</AlertTitle>
-          <AlertDescription>
-            The URL `types` filter matches no known Timeline Event types. Choose
-            at least one type and apply filters.
-          </AlertDescription>
-        </Alert>
+        <ErrorAlert
+          title="No event types selected"
+          message="The URL `types` filter matches no known Timeline Event types. Choose at least one type and apply filters."
+        />
       ) : null}
 
       {!clientWindowError &&
@@ -560,24 +543,11 @@ export function AdmissionTimeline({
       ) : null}
 
       {!clientWindowError && selectedTypes.length > 0 && query.isError ? (
-        <Alert variant="destructive">
-          <AlertCircle />
-          <AlertTitle>Could not load timeline</AlertTitle>
-          <AlertDescription>
-            {query.error instanceof Error
-              ? query.error.message
-              : "Request failed."}
-          </AlertDescription>
-          <div className="col-start-2 mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void query.refetch()}
-            >
-              Retry
-            </Button>
-          </div>
-        </Alert>
+        <ErrorAlert
+          title="Could not load timeline"
+          message={query.error}
+          onRetry={() => void query.refetch()}
+        />
       ) : null}
 
       {!clientWindowError &&
@@ -598,15 +568,19 @@ export function AdmissionTimeline({
           </div>
 
           {items.length === 0 ? (
-            <Empty className="border py-12">
-              <EmptyHeader>
-                <EmptyTitle>No Timeline Events</EmptyTitle>
-                <EmptyDescription>
-                  Nothing matches the current type and time filters. Clear or
-                  widen filters to see more of this Admission.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <EmptyState
+              title="No Timeline Events"
+              description="Nothing matches the current type and time filters. Clear or widen filters to see more of this Admission."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onSearchChange({})}
+                >
+                  Clear filters
+                </Button>
+              }
+            />
           ) : (
             <div className="relative border-l border-border/80 pl-1">
               {items.map((item, i) =>
