@@ -15,6 +15,12 @@ from app.templates.catalog import TEMPLATE_BY_ID, catalog_for_llm, run_template
 def _summarize_grounded(template_id: str, rows: list[dict[str, Any]]) -> str:
     n = len(rows)
     name = TEMPLATE_BY_ID[template_id].name
+    if template_id == "event_ordering":
+        return (
+            f"Grounded Answer from template '{name}': compared the earliest matching "
+            "timestamp for each side (earliest-match rule when multiple rows match a label). "
+            f"{n} row(s) retrieved from the structured record."
+        )
     return f"Grounded Answer from template '{name}': {n} row(s) retrieved from the structured record."
 
 

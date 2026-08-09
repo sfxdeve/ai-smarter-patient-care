@@ -410,6 +410,103 @@ def test_procedures_zero_rows_is_no_data_with_coverage() -> None:
     assert "No-Data" in body["summary"] or "zero rows" in body["summary"].lower()
 
 
+def test_event_ordering_zero_match_is_no_data_with_coverage() -> None:
+    """Zero matches on a required side → No-Data Answer with coverage, not abstention/bare no."""
+    sid, hadm = 10039708, 28258130
+    question = "Did ZZZNotARealEvent happen before Creatinine?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(
+            template_id="event_ordering",
+            slots={"event_a": "ZZZNotARealEvent", "event_b": "Creatinine"},
+        ),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "no_data"
+    assert body["template_id"] == "event_ordering"
+    assert body["rows"] == []
+    assert body["provenance"] == []
+    assert body["coverage"]
+    assert body["coverage"][0]["table"]
+    assert "no" != body["summary"].strip().lower()
+    assert "No-Data" in body["summary"] or "zero rows" in body["summary"].lower()
+    assert body.get("kind") != "abstention"
+
+
+def test_event_ordering_multi_match_uses_earliest_with_dual_provenance() -> None:
+    """Many Creatinine/Heparin rows → earliest each side; provenance both; summary states rule."""
+    sid, hadm = 10039708, 28258130
+    # Known demo earliests for this Admission (multi-match labs + eMAR).
+    earliest_creatinine = "2140-01-23 19:14:00"
+    earliest_heparin = "2140-01-25 18:49:00"
+    question = "Did Creatinine happen before Heparin?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(
+            template_id="event_ordering",
+            slots={"event_a": "Creatinine", "event_b": "Heparin"},
+        ),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "grounded"
+    assert body["template_id"] == "event_ordering"
+    by_role = {r["role"]: r for r in body["rows"] if "role" in r}
+    assert by_role["event_a"]["event_time"] == earliest_creatinine
+    assert by_role["event_b"]["event_time"] == earliest_heparin
+    assert by_role["ordering"]["a_before_b"] is True
+    assert len(body["provenance"]) >= 2
+    tables = {p["table"] for p in body["provenance"]}
+    assert "labevents" in tables
+    assert "emar" in tables
+    for p in body["provenance"]:
+        assert p["table"] and p["field"] and p["row_id"] is not None and p["time"]
+    summary_l = body["summary"].lower()
+    assert "earliest" in summary_l
+
+
+def test_event_ordering_resolves_beyond_labs_and_meds() -> None:
+    """Ordering sides resolve across full timeline taxonomy (admit + ICU observation)."""
+    sid, hadm = 10039708, 28258130
+    earliest_admit = "2140-01-23 16:19:00"
+    earliest_hr = "2140-01-23 19:00:00"
+    question = "Did admission happen before Heart Rate?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(
+            template_id="event_ordering",
+            slots={"event_a": "Admitted", "event_b": "Heart Rate"},
+        ),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "grounded"
+    by_role = {r["role"]: r for r in body["rows"] if "role" in r}
+    assert by_role["event_a"]["event_time"] == earliest_admit
+    assert by_role["event_b"]["event_time"] == earliest_hr
+    assert by_role["ordering"]["a_before_b"] is True
+    tables = {p["table"] for p in body["provenance"]}
+    assert "admissions" in tables
+    assert "chartevents" in tables
+    assert "earliest" in body["summary"].lower()
+
+
 def test_qa_examples(client: TestClient) -> None:
     res = client.get("/qa/examples")
     assert res.status_code == 200

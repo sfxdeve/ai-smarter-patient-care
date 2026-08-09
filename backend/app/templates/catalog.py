@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 import duckdb
 
-from app.db import fetchall_dicts
+from app.db import VITAL_ITEMIDS, fetchall_dicts
 from app.models import Provenance
 from app.services.coverage import coverage_for_table
 
@@ -416,69 +416,314 @@ def run_events_between(
     return TemplateResult(rows=rows, provenance=prov, sql=sql.strip(), coverage_table="labevents")
 
 
+def _earliest_timeline_match(
+    con: duckdb.DuckDBPyConnection,
+    subject_id: int,
+    hadm_id: int | None,
+    label: str,
+) -> tuple[dict[str, Any] | None, int]:
+    """Resolve a label across the Timeline Event taxonomy; earliest timestamp wins.
+
+    Searches admit/discharge, transfers, labs, medication administrations,
+    microbiology, procedures (hosp ICD + ICU), and ICU observations.
+    Billing Context is excluded. Returns (chosen_row_or_None, match_count).
+    """
+    pattern = f"%{label}%"
+    scope = [subject_id, hadm_id, hadm_id]
+    candidates: list[dict[str, Any]] = []
+
+    for r in fetchall_dicts(
+        con,
+        """
+        SELECT hadm_id,
+               CAST(admittime AS VARCHAR) AS admittime,
+               CAST(dischtime AS VARCHAR) AS dischtime,
+               admission_type, admission_location, discharge_location
+        FROM admissions
+        WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)
+        """,
+        scope,
+    ):
+        admit_label = f"Admitted ({r['admission_type'] or 'unknown type'})"
+        admit_blob = (
+            f"{admit_label} {r['admission_location'] or ''} admit admission admitted"
+        )
+        if _label_like(admit_blob, label):
+            candidates.append(
+                {
+                    "row_id": r["hadm_id"],
+                    "event_time": r["admittime"],
+                    "label": admit_label,
+                    "src": "admissions",
+                    "field": "admittime",
+                    "event_type": "admit_discharge",
+                }
+            )
+        disch_label = "Discharged"
+        disch_blob = f"{disch_label} {r['discharge_location'] or ''} discharge discharged"
+        if _label_like(disch_blob, label):
+            candidates.append(
+                {
+                    "row_id": r["hadm_id"],
+                    "event_time": r["dischtime"],
+                    "label": disch_label,
+                    "src": "admissions",
+                    "field": "dischtime",
+                    "event_type": "admit_discharge",
+                }
+            )
+
+    candidates.extend(
+        {
+            "row_id": r["transfer_id"],
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "transfers",
+            "field": "intime",
+            "event_type": "transfer",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT transfer_id, CAST(intime AS VARCHAR) AS event_time,
+                   COALESCE(careunit, eventtype, 'Transfer') AS label
+            FROM transfers
+            WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)
+              AND (
+                lower(COALESCE(eventtype, '')) LIKE lower(?)
+                OR lower(COALESCE(careunit, '')) LIKE lower(?)
+                OR lower('transfer') LIKE lower(?)
+              )
+            """,
+            scope + [pattern, pattern, pattern],
+        )
+    )
+
+    candidates.extend(
+        {
+            "row_id": r["row_id"],
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "labevents",
+            "field": "valuenum",
+            "event_type": "lab",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT l.labevent_id AS row_id, CAST(l.charttime AS VARCHAR) AS event_time,
+                   d.label
+            FROM labevents l
+            JOIN d_labitems d ON l.itemid = d.itemid
+            WHERE l.subject_id = ? AND (? IS NULL OR l.hadm_id = ?)
+              AND lower(d.label) LIKE lower(?)
+            """,
+            scope + [pattern],
+        )
+    )
+
+    candidates.extend(
+        {
+            "row_id": r["row_id"],
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "emar",
+            "field": "medication",
+            "event_type": "medication",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT emar_id AS row_id, CAST(charttime AS VARCHAR) AS event_time,
+                   medication AS label
+            FROM emar
+            WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)
+              AND lower(medication) LIKE lower(?)
+            """,
+            scope + [pattern],
+        )
+    )
+
+    candidates.extend(
+        {
+            "row_id": r["row_id"],
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "microbiologyevents",
+            "field": "org_name",
+            "event_type": "microbiology",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT microevent_id AS row_id,
+                   CAST(COALESCE(charttime, chartdate) AS VARCHAR) AS event_time,
+                   COALESCE(test_name, spec_type_desc, org_name, 'Microbiology') AS label
+            FROM microbiologyevents
+            WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)
+              AND (
+                lower(COALESCE(test_name, '')) LIKE lower(?)
+                OR lower(COALESCE(spec_type_desc, '')) LIKE lower(?)
+                OR lower(COALESCE(org_name, '')) LIKE lower(?)
+              )
+            """,
+            scope + [pattern, pattern, pattern],
+        )
+    )
+
+    candidates.extend(
+        {
+            "row_id": f"{r['hadm_id']}:{r['seq_num']}",
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "procedures_icd",
+            "field": "icd_code",
+            "event_type": "procedure",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT p.hadm_id, p.seq_num, CAST(p.chartdate AS VARCHAR) AS event_time,
+                   COALESCE(d.long_title, p.icd_code) AS label
+            FROM procedures_icd p
+            LEFT JOIN d_icd_procedures d
+              ON p.icd_code = d.icd_code AND p.icd_version = d.icd_version
+            WHERE p.subject_id = ? AND (? IS NULL OR p.hadm_id = ?)
+              AND (
+                lower(COALESCE(d.long_title, '')) LIKE lower(?)
+                OR lower(COALESCE(p.icd_code, '')) LIKE lower(?)
+              )
+            """,
+            scope + [pattern, pattern],
+        )
+    )
+
+    candidates.extend(
+        {
+            "row_id": int(r["row_id"]) if r["row_id"] is not None else None,
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "procedureevents",
+            "field": "starttime",
+            "event_type": "procedure",
+        }
+        for r in fetchall_dicts(
+            con,
+            """
+            SELECT pe.orderid AS row_id, CAST(pe.starttime AS VARCHAR) AS event_time,
+                   COALESCE(d.label, 'ICU procedure') AS label
+            FROM procedureevents pe
+            LEFT JOIN d_items d ON pe.itemid = d.itemid
+            WHERE pe.subject_id = ? AND (? IS NULL OR pe.hadm_id = ?)
+              AND lower(COALESCE(d.label, '')) LIKE lower(?)
+            """,
+            scope + [pattern],
+        )
+    )
+
+    item_list = ", ".join(str(i) for i in VITAL_ITEMIDS)
+    candidates.extend(
+        {
+            "row_id": f"{r['stay_id']}:{r['itemid']}:{r['event_time']}",
+            "event_time": r["event_time"],
+            "label": r["label"],
+            "src": "chartevents",
+            "field": "valuenum",
+            "event_type": "icu_observation",
+        }
+        for r in fetchall_dicts(
+            con,
+            f"""
+            SELECT c.stay_id, c.itemid, CAST(c.charttime AS VARCHAR) AS event_time,
+                   COALESCE(d.label, CAST(c.itemid AS VARCHAR)) AS label
+            FROM chartevents c
+            LEFT JOIN d_items d ON c.itemid = d.itemid
+            WHERE c.subject_id = ? AND (? IS NULL OR c.hadm_id = ?)
+              AND c.itemid IN ({item_list})
+              AND lower(COALESCE(d.label, '')) LIKE lower(?)
+            """,
+            scope + [pattern],
+        )
+    )
+
+    timed = [c for c in candidates if c.get("event_time")]
+    if not timed:
+        return None, 0
+    timed.sort(key=lambda c: (c["event_time"], str(c.get("src") or ""), str(c.get("row_id") or "")))
+    return timed[0], len(timed)
+
+
+def _label_like(haystack: str, label: str) -> bool:
+    return label.lower() in haystack.lower()
+
+
 def run_event_ordering(
     con: duckdb.DuckDBPyConnection, subject_id: int, hadm_id: int | None, slots: dict[str, Any]
 ) -> TemplateResult:
-    """Compare timestamps of two labeled events (A before B?)."""
+    """Compare timestamps of two labeled Timeline Events (A before B?).
+
+    Each side is resolved across the full Timeline Event taxonomy (not Billing
+    Context). Zero matches on a required side → empty result (No-Data). Many
+    matches → earliest timestamp; Provenance references the chosen row.
+    """
     bound = _bind_context(slots, subject_id, hadm_id)
     a_label = bound.get("event_a")
     b_label = bound.get("event_b")
     if not a_label or not b_label:
         raise ValueError("event_a and event_b required")
 
-    def first_lab(label: str) -> dict[str, Any] | None:
-        rows = fetchall_dicts(
-            con,
-            """
-            SELECT l.labevent_id AS row_id, CAST(l.charttime AS VARCHAR) AS event_time,
-                   d.label, 'labevents' AS src
-            FROM labevents l JOIN d_labitems d ON l.itemid = d.itemid
-            WHERE l.subject_id = ? AND (? IS NULL OR l.hadm_id = ?)
-              AND lower(d.label) LIKE lower(?)
-            ORDER BY l.charttime LIMIT 1
-            """,
-            [bound["subject_id"], bound.get("hadm_id"), bound.get("hadm_id"), f"%{label}%"],
-        )
-        return rows[0] if rows else None
+    a, a_count = _earliest_timeline_match(con, bound["subject_id"], bound.get("hadm_id"), str(a_label))
+    b, b_count = _earliest_timeline_match(con, bound["subject_id"], bound.get("hadm_id"), str(b_label))
 
-    def first_med(label: str) -> dict[str, Any] | None:
-        rows = fetchall_dicts(
-            con,
-            """
-            SELECT emar_id AS row_id, CAST(charttime AS VARCHAR) AS event_time,
-                   medication AS label, 'emar' AS src
-            FROM emar
-            WHERE subject_id = ? AND (? IS NULL OR hadm_id = ?)
-              AND lower(medication) LIKE lower(?)
-            ORDER BY charttime LIMIT 1
-            """,
-            [bound["subject_id"], bound.get("hadm_id"), bound.get("hadm_id"), f"%{label}%"],
-        )
-        return rows[0] if rows else None
+    sql = (
+        "-- event_ordering: earliest matching Timeline Event timestamps "
+        "for event_a vs event_b across admit/discharge, transfers, labs, "
+        "medications, microbiology, procedures (hosp+ICU), ICU observations"
+    )
 
-    a = first_lab(a_label) or first_med(a_label)
-    b = first_lab(b_label) or first_med(b_label)
-    rows: list[dict[str, Any]] = []
-    if a:
-        rows.append({"role": "event_a", **a})
-    if b:
-        rows.append({"role": "event_b", **b})
-    if a and b:
-        rows.append(
-            {
-                "role": "ordering",
-                "a_before_b": a["event_time"] < b["event_time"],
-                "a_time": a["event_time"],
-                "b_time": b["event_time"],
-            }
-        )
-    prov = [
-        _prov(r["src"], "event_time", r["row_id"], r["event_time"])
-        for r in rows
-        if r.get("role") in ("event_a", "event_b")
+    # Incomplete sides are No-Data (not a partial grounded answer).
+    if not a or not b:
+        cov = "labevents"
+        if a and not b:
+            cov = str(a.get("src") or cov)
+        elif b and not a:
+            cov = str(b.get("src") or cov)
+        return TemplateResult(rows=[], provenance=[], sql=sql, coverage_table=cov)
+
+    rows: list[dict[str, Any]] = [
+        {
+            "role": "event_a",
+            "row_id": a["row_id"],
+            "event_time": a["event_time"],
+            "label": a["label"],
+            "src": a["src"],
+            "event_type": a.get("event_type"),
+            "match_count": a_count,
+            "match_rule": "earliest",
+        },
+        {
+            "role": "event_b",
+            "row_id": b["row_id"],
+            "event_time": b["event_time"],
+            "label": b["label"],
+            "src": b["src"],
+            "event_type": b.get("event_type"),
+            "match_count": b_count,
+            "match_rule": "earliest",
+        },
+        {
+            "role": "ordering",
+            "a_before_b": a["event_time"] < b["event_time"],
+            "a_time": a["event_time"],
+            "b_time": b["event_time"],
+            "match_rule": "earliest",
+        },
     ]
-    sql = "-- event_ordering: first matching lab/med timestamps for event_a vs event_b"
-    return TemplateResult(rows=rows, provenance=prov, sql=sql, coverage_table="labevents")
+    prov = [
+        _prov(a["src"], a["field"], a["row_id"], a["event_time"]),
+        _prov(b["src"], b["field"], b["row_id"], b["event_time"]),
+    ]
+    return TemplateResult(rows=rows, provenance=prov, sql=sql, coverage_table=str(a["src"]))
 
 
 def run_counts(
@@ -656,7 +901,13 @@ CATALOG: list[TemplateDef] = [
     TemplateDef(
         id="event_ordering",
         name="Event ordering",
-        description="Did event A happen before event B? Returns both timestamps and Provenance.",
+        description=(
+            "Did event A happen before event B? Resolves each side by label/name across the "
+            "full Timeline Event taxonomy (admit/discharge, transfers, labs, medication "
+            "administrations, microbiology, procedures hosp+ICU, ICU observations — not "
+            "Billing Context). Many matches → earliest timestamp per side with Provenance "
+            "on the chosen rows; zero matches on a side → No-Data."
+        ),
         slots=["event_a", "event_b", "hadm_id"],
         example_question="Did the first creatinine lab happen before the first heparin administration?",
         coverage_table="labevents",
