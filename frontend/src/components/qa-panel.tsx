@@ -77,7 +77,7 @@ export function QaPanel({
           <div className="flex flex-wrap items-center gap-2">
             <Badge>{answer.kind}</Badge>
             <Badge variant="outline">interpreter: {answer.interpreter}</Badge>
-            {answer.interpreter === "keyword_fallback" ? (
+            {answer.interpreter === "keyword_rescue" ? (
               <Badge variant="secondary">LLM unreachable — keyword baseline</Badge>
             ) : null}
             {answer.template_id ? (

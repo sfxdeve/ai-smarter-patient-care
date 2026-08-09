@@ -1,4 +1,4 @@
-"""Keyword-matching baseline interpreter (rubric comparison + offline fallback)."""
+"""Keyword-matching baseline interpreter (rubric comparison + LLM outage rescue)."""
 
 from __future__ import annotations
 

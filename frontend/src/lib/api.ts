@@ -124,7 +124,7 @@ export type QaResponse = {
   template_id: string | null
   slots: Record<string, unknown>
   sql: string | null
-  interpreter: "llm" | "keyword" | "keyword_fallback" | "fake"
+  interpreter: "llm" | "keyword" | "keyword_rescue" | "fake"
   abstention_reason: string | null
   is_ai_phrasing: boolean
 }

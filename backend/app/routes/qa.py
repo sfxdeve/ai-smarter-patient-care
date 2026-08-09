@@ -29,14 +29,17 @@ def api_qa(
             status_code=400,
             detail=f"Admission hadm_id={body.hadm_id} does not belong to Patient {body.subject_id}",
         )
-    return answer_question(
-        con,
-        question=body.question,
-        subject_id=body.subject_id,
-        hadm_id=body.hadm_id,
-        interpreter=interpreter,
-        allow_keyword_fallback=True,
-    )
+    try:
+        return answer_question(
+            con,
+            question=body.question,
+            subject_id=body.subject_id,
+            hadm_id=body.hadm_id,
+            interpreter=interpreter,
+            allow_keyword_rescue=True,
+        )
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/qa/examples", response_model=list[ExampleQuestion])

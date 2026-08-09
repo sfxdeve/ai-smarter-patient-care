@@ -280,8 +280,8 @@ def render_markdown(
         "",
         "## LLM vs keyword baseline",
         "",
-        "Both interpreters are scored on the identical Gold Set. The keyword baseline is also the "
-        "offline fallback when the LLM API is unreachable.",
+        "Both interpreters are scored on the identical Gold Set. The keyword baseline is also used "
+        "as keyword_rescue when the LLM API is unreachable.",
         "",
         "## Representative errors",
         "",

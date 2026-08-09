@@ -48,7 +48,7 @@ Citation: Johnson, A., et al. MIMIC-IV Clinical Database Demo (version 2.2). Phy
 | No-Data Answer | Valid template, zero rows + per-Patient table coverage (e.g. eMAR 65/100) |
 | Abstention | No template fits, or clinical-advice / out-of-scope request |
 
-Bare unqualified “no” is never emitted. If the LLM API is unreachable, the **keyword baseline** runs and is labeled `keyword_fallback` in the UI.
+Bare unqualified “no” is never emitted. If the LLM API is unreachable, the **keyword baseline** runs and is labeled `keyword_rescue` in the UI.
 
 ## Tests & evaluation
 
@@ -70,7 +70,7 @@ Gold Set: ~100 questions (fact, temporal, aggregate, unanswerable). Metrics: str
 6. Ask grounded questions (“How many transfers?”); inspect template, SQL, Provenance.  
 7. Ask a Patient **without** eMAR about medications → No-Data + coverage.  
 8. Ask clinical advice → Abstention.  
-9. Stop the LLM / unset key → keyword fallback labeled in QA panel.  
+9. Stop the LLM / unset key → keyword rescue labeled in QA panel.  
 
 ## Configuration
 

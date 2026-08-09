@@ -6,7 +6,7 @@ import duckdb
 
 from app.db import SCHEMA_DESCRIPTION
 from app.interpreters.base import Abstain, QuestionInterpreter, TemplateChoice
-from app.interpreters.keyword import KeywordBaselineInterpreter  # also used as LLM fallback
+from app.interpreters.keyword import KeywordBaselineInterpreter
 from app.models import Provenance, QaResponse, TableCoverage
 from app.services.coverage import coverage_for_table
 from app.templates.catalog import TEMPLATE_BY_ID, catalog_for_llm, run_template
@@ -37,34 +37,20 @@ def answer_question(
     subject_id: int,
     hadm_id: int | None,
     interpreter: QuestionInterpreter,
-    allow_keyword_fallback: bool = True,
+    allow_keyword_rescue: bool = True,
 ) -> QaResponse:
     catalog = catalog_for_llm()
-    interpreter_used: Literal["llm", "keyword", "keyword_fallback", "fake"]
+    interpreter_used: Literal["llm", "keyword", "keyword_rescue", "fake"]
     raw_name = getattr(interpreter, "name", "fake")
 
     try:
         result = interpreter.interpret(question, SCHEMA_DESCRIPTION, catalog)
         interpreter_used = raw_name if raw_name in ("llm", "keyword", "fake") else "fake"
-    except Exception as exc:  # noqa: BLE001
-        if not allow_keyword_fallback or raw_name == "keyword":
+    except Exception:
+        if not allow_keyword_rescue or raw_name != "llm":
             raise
         result = KeywordBaselineInterpreter().interpret(question, SCHEMA_DESCRIPTION, catalog)
-        interpreter_used = "keyword_fallback"
-        _ = exc
-
-    # If the LLM abstains as "no template" but the keyword baseline can route safely,
-    # prefer the baseline (labeled) rather than refusing an in-scope question.
-    if (
-        isinstance(result, Abstain)
-        and result.trigger == "no_template"
-        and allow_keyword_fallback
-        and raw_name == "llm"
-    ):
-        kw = KeywordBaselineInterpreter().interpret(question, SCHEMA_DESCRIPTION, catalog)
-        if isinstance(kw, TemplateChoice):
-            result = kw
-            interpreter_used = "keyword_fallback"
+        interpreter_used = "keyword_rescue"
 
     if isinstance(result, Abstain):
         return QaResponse(
@@ -79,26 +65,14 @@ def answer_question(
         )
 
     assert isinstance(result, TemplateChoice)
-    tmpl = TEMPLATE_BY_ID[result.template_id]
     slots = dict(result.slots)
     if hadm_id is not None:
         slots.setdefault("hadm_id", hadm_id)
 
     try:
         tr = run_template(con, result.template_id, subject_id, hadm_id, slots)
-    except Exception as exc:  # noqa: BLE001
-        return QaResponse(
-            kind="abstention",
-            question=question,
-            subject_id=subject_id,
-            hadm_id=hadm_id,
-            summary=f"Abstention: template '{result.template_id}' could not run ({exc}).",
-            template_id=result.template_id,
-            slots=slots,
-            interpreter=interpreter_used,
-            abstention_reason=str(exc),
-            is_ai_phrasing=True,
-        )
+    except Exception as exc:
+        raise ValueError(str(exc)) from exc
 
     coverage = coverage_for_table(con, subject_id, tr.coverage_table)
 

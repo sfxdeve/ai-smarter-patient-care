@@ -124,7 +124,7 @@ class QaResponse(BaseModel):
     template_id: str | None = None
     slots: dict[str, Any] = Field(default_factory=dict)
     sql: str | None = None
-    interpreter: Literal["llm", "keyword", "keyword_fallback", "fake"]
+    interpreter: Literal["llm", "keyword", "keyword_rescue", "fake"]
     abstention_reason: str | None = None
     is_ai_phrasing: bool = True
 
