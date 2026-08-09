@@ -173,9 +173,39 @@ def _score_case(item: dict[str, Any], body: dict[str, Any]) -> CaseResult:
     )
 
 
+def _error_case(
+    item: dict[str, Any],
+    *,
+    notes: str,
+    actual_template: str | None = None,
+) -> CaseResult:
+    return CaseResult(
+        id=item["id"],
+        category=item["category"],
+        kind_ok=False,
+        template_ok=False,
+        fact_ok=False if item["category"] in ("fact", "aggregate") else None,
+        temporal_ok=False if item["category"] == "temporal" else None,
+        abstention_ok=False if item["category"] == "unanswerable" else None,
+        provenance_complete=False,
+        expected_kind=item["expected_kind"],
+        actual_kind="error",
+        expected_template=item.get("expected_template_id"),
+        actual_template=actual_template,
+        notes=notes,
+    )
+
+
 def evaluate_interpreter(name: str, gold: list[dict[str, Any]], make_interp) -> InterpreterReport:
+    """Score one interpreter on the Gold Set.
+
+    Keyword rescue is disabled so each interpreter is scored purely — LLM
+    Abstention (no_template) stays Abstention; transport failures surface as
+    errors rather than silently becoming keyword answers.
+    """
     report = InterpreterReport(name=name)
     app = create_app()
+    app.state.allow_keyword_rescue = False
 
     for item in gold:
         app.state.interpreter = make_interp(item)
@@ -189,32 +219,37 @@ def evaluate_interpreter(name: str, gold: list[dict[str, Any]], make_interp) -> 
                 },
             )
         if res.status_code != 200:
-            cr = CaseResult(
-                id=item["id"],
-                category=item["category"],
-                kind_ok=False,
-                template_ok=False,
-                fact_ok=False if item["category"] in ("fact", "aggregate") else None,
-                temporal_ok=False if item["category"] == "temporal" else None,
-                abstention_ok=False if item["category"] == "unanswerable" else None,
-                provenance_complete=False,
-                expected_kind=item["expected_kind"],
-                actual_kind="error",
-                expected_template=item.get("expected_template_id"),
-                actual_template=None,
-                notes=f"HTTP {res.status_code}: {res.text[:200]}",
-            )
+            cr = _error_case(item, notes=f"HTTP {res.status_code}: {res.text[:200]}")
         else:
-            cr = _score_case(item, res.json())
+            body = res.json()
+            # Pure comparison: never credit another interpreter's answer.
+            if body.get("interpreter") == "keyword_rescue":
+                cr = _error_case(
+                    item,
+                    notes="keyword_rescue leaked into pure interpreter scoring",
+                    actual_template=body.get("template_id"),
+                )
+            else:
+                cr = _score_case(item, body)
         report.cases.append(cr)
-        if not cr.kind_ok or cr.notes.startswith("HTTP"):
+        metric_fail = (
+            cr.fact_ok is False
+            or cr.temporal_ok is False
+            or cr.abstention_ok is False
+            or not cr.provenance_complete
+        )
+        if not cr.kind_ok or cr.notes.startswith("HTTP") or metric_fail:
             report.errors.append(
                 {
                     "id": cr.id,
                     "question": item["question"],
                     "expected_kind": cr.expected_kind,
                     "actual_kind": cr.actual_kind,
-                    "notes": cr.notes,
+                    "notes": cr.notes
+                    or (
+                        f"fact_ok={cr.fact_ok} temporal_ok={cr.temporal_ok} "
+                        f"abstention_ok={cr.abstention_ok} provenance={cr.provenance_complete}"
+                    ),
                 }
             )
 
@@ -280,8 +315,11 @@ def render_markdown(
         "",
         "## LLM vs keyword baseline",
         "",
-        "Both interpreters are scored on the identical Gold Set. The keyword baseline is also used "
-        "as keyword_rescue when the LLM API is unreachable.",
+        "Interpreters on this report are scored on the identical Gold Set with **pure** paths: "
+        "eval sets `allow_keyword_rescue=False`, so an LLM `no_template` Abstention is never "
+        "silently re-routed through keyword (and a leaked `keyword_rescue` answer is scored as "
+        "error). Offline runs (`--skip-llm`) omit the LLM row; production HTTP may still label "
+        "`keyword_rescue` on LLM transport/API outage only.",
         "",
         "## Representative errors",
         "",
@@ -352,17 +390,37 @@ def main() -> None:
         except Exception as exc:  # noqa: BLE001
             print(f"LLM eval skipped: {exc}", file=sys.stderr)
 
+    llm_ran = any(r.name.startswith("llm") for r in reports)
+    if llm_ran:
+        honest_body = (
+            "On the identical Gold Set (pure scoring: no keyword rescue after LLM Abstention), "
+            "the keyword baseline scores perfectly when questions match its patterns, while the "
+            "LLM interpreter still over-abstains on in-scope template questions and often fails "
+            "to copy long eMAR strings into `event_ordering` slots. Chronicle keeps the safety "
+            "property: bad classifications become Abstention or No-Data, never fabricated rows. "
+            "The oracle_template path (forced gold slots) scores 1.0 across all metrics after "
+            "Gold Set procedure_count expectations were updated for the hosp+ICU procedures "
+            "union; existing vitals_summary and event_ordering cases still match the runners. "
+            "The gap is interpretation rather than SQL/assembly."
+        )
+    else:
+        honest_body = (
+            "This offline report scores oracle_template and keyword_baseline only "
+            "(`make eval-offline` / `--skip-llm`). Both reach 1.0 on the 104-question Gold Set "
+            "after procedure_count expectations were updated for the hosp+ICU procedures union; "
+            "vitals_summary and event_ordering gold cases remain valid under the post-01–04 "
+            "runners. Pure scoring disables keyword rescue so interpreters are not cross-credited. "
+            "Run `make eval` (with LLM credentials) to refresh live LLM metrics; prior full runs "
+            "showed LLM over-Abstention on in-scope questions and weak temporal slot-filling — "
+            "safety property held (Abstention/No-Data, never fabricated rows)."
+        )
     honest = {
-        "title": "LLM interpreter over-abstains and mishandles long temporal event names",
-        "body": (
-            "On the identical Gold Set, the keyword baseline now scores perfectly when questions "
-            "match its patterns, while DeepSeek via Zen still over-abstains on in-scope template "
-            "questions and often fails to copy long eMAR strings into `event_ordering` slots "
-            "(temporal-order accuracy 0.0 in the latest run). Chronicle keeps the safety property: "
-            "bad classifications become Abstention or No-Data, never fabricated rows. The "
-            "oracle_template path (forced gold slots) scores 1.0 across all metrics, isolating "
-            "the gap to interpretation rather than SQL/assembly."
+        "title": (
+            "LLM over-Abstention (see full `make eval` run)"
+            if not llm_ran
+            else "LLM interpreter over-abstains and mishandles long temporal event names"
         ),
+        "body": honest_body,
     }
 
     md = render_markdown(reports, gold, honest)

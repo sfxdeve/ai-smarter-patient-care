@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import duckdb
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.deps import get_db, get_qa_interpreter
 from app.interpreters.base import QuestionInterpreter
@@ -16,6 +16,7 @@ router = APIRouter(tags=["qa"])
 @router.post("/qa", response_model=QaResponse)
 def api_qa(
     body: QaRequest,
+    request: Request,
     con: duckdb.DuckDBPyConnection = Depends(get_db),
     interpreter: QuestionInterpreter = Depends(get_qa_interpreter),
 ) -> QaResponse:
@@ -29,6 +30,9 @@ def api_qa(
             status_code=400,
             detail=f"Admission hadm_id={body.hadm_id} does not belong to Patient {body.subject_id}",
         )
+    # Production default is True (rescue on LLM transport outage only).
+    # Eval sets app.state.allow_keyword_rescue=False for pure interpreter comparison.
+    allow_rescue = getattr(request.app.state, "allow_keyword_rescue", True)
     try:
         return answer_question(
             con,
@@ -36,7 +40,7 @@ def api_qa(
             subject_id=body.subject_id,
             hadm_id=body.hadm_id,
             interpreter=interpreter,
-            allow_keyword_rescue=True,
+            allow_keyword_rescue=allow_rescue,
         )
     except (ValueError, KeyError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

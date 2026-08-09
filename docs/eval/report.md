@@ -1,6 +1,6 @@
 # Chronicle evaluation report
 
-Generated: 2026-08-08 16:51 UTC
+Generated: 2026-08-09 10:26 UTC
 
 ## Sample
 
@@ -16,11 +16,10 @@ Generated: 2026-08-08 16:51 UTC
 |---|---:|---:|---:|---:|---:|---:|
 | oracle_template | 104 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
 | keyword_baseline | 104 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
-| llm_deepseek | 104 | 0.911 | 0.000 | 1.000 | 1.000 | 0.625 |
 
 ## LLM vs keyword baseline
 
-Both interpreters are scored on the identical Gold Set. The keyword baseline is also used as keyword_rescue when the LLM API is unreachable.
+Interpreters on this report are scored on the identical Gold Set with **pure** paths: eval sets `allow_keyword_rescue=False`, so an LLM `no_template` Abstention is never silently re-routed through keyword (and a leaked `keyword_rescue` answer is scored as error). Offline runs (`--skip-llm`) omit the LLM row; production HTTP may still label `keyword_rescue` on LLM transport/API outage only.
 
 ## Representative errors
 
@@ -32,19 +31,11 @@ Both interpreters are scored on the identical Gold Set. The keyword baseline is 
 
 - `—`: expected `None`, got `None` — (none in sample) ()
 
-### llm_deepseek
-
-- `fact-first-k`: expected `grounded`, got `abstention` — When was the first potassium lab? (kind=abstention)
-- `fact-vitals-28258130`: expected `grounded`, got `abstention` — Summarize heart rate and respiratory rate for this admission. (kind=abstention)
-- `fact-meds-28258130`: expected `grounded`, got `abstention` — Which medications were administered during this admission? (kind=abstention)
-- `fact-vitals-22595853`: expected `no_data`, got `abstention` — Summarize heart rate and respiratory rate for this admission. ()
-- `fact-meds-22595853`: expected `grounded`, got `abstention` — Which medications were administered during this admission? (kind=abstention)
-
 ## Honest failure case
 
-**LLM interpreter over-abstains and mishandles long temporal event names**
+**LLM over-Abstention (see full `make eval` run)**
 
-On the identical Gold Set, the keyword baseline now scores perfectly when questions match its patterns, while DeepSeek via Zen still over-abstains on in-scope template questions and often fails to copy long eMAR strings into `event_ordering` slots (temporal-order accuracy 0.0 in the latest run). Chronicle keeps the safety property: bad classifications become Abstention or No-Data, never fabricated rows. The oracle_template path (forced gold slots) scores 1.0 across all metrics, isolating the gap to interpretation rather than SQL/assembly.
+This offline report scores oracle_template and keyword_baseline only (`make eval-offline` / `--skip-llm`). Both reach 1.0 on the 104-question Gold Set after procedure_count expectations were updated for the hosp+ICU procedures union; vitals_summary and event_ordering gold cases remain valid under the post-01–04 runners. Pure scoring disables keyword rescue so interpreters are not cross-credited. Run `make eval` (with LLM credentials) to refresh live LLM metrics; prior full runs showed LLM over-Abstention on in-scope questions and weak temporal slot-filling — safety property held (Abstention/No-Data, never fabricated rows).
 
 ## Notes
 

@@ -132,7 +132,7 @@
     "expected_kind": "grounded",
     "expected_template_id": "procedures",
     "gold": {
-      "procedure_count": 21
+      "procedure_count": 58
     }
   },
   {
@@ -218,7 +218,7 @@
     "expected_kind": "grounded",
     "expected_template_id": "procedures",
     "gold": {
-      "procedure_count": 6
+      "procedure_count": 36
     }
   },
   {
@@ -304,7 +304,7 @@
     "expected_kind": "grounded",
     "expected_template_id": "procedures",
     "gold": {
-      "procedure_count": 3
+      "procedure_count": 6
     }
   },
   {
