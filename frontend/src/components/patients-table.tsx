@@ -30,9 +30,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { PatientSummary, TableCoverage } from "@/lib/api"
+import {
+  EMAR_TABLE,
+  coverageFor as coverageInList,
+  formatCoverageBadge,
+  formatCoverageLabel,
+} from "@/lib/coverage"
 import { cn } from "@/lib/utils"
-
-const EMAR_TABLE = "emar"
 
 const features = tableFeatures({
   rowSortingFeature,
@@ -49,12 +53,7 @@ function coverageFor(
   patient: PatientSummary,
   table: string
 ): TableCoverage | undefined {
-  return patient.coverage.find((c) => c.table === table)
-}
-
-function formatCoverageLabel(table: string): string {
-  if (table === EMAR_TABLE) return "eMAR"
-  return table
+  return coverageInList(patient.coverage, table)
 }
 
 const columns = columnHelper.columns([
@@ -114,9 +113,7 @@ const columns = columnHelper.columns([
       if (!emar) return "—"
       return (
         <Badge variant={emar.has_rows ? "secondary" : "outline"}>
-          {emar.has_rows
-            ? `${formatCoverageLabel(EMAR_TABLE)} · ${emar.row_count.toLocaleString()}`
-            : "No eMAR"}
+          {formatCoverageBadge(emar)}
         </Badge>
       )
     },
