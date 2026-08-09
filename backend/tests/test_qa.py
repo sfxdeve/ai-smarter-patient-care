@@ -351,6 +351,65 @@ def test_vitals_summary_zero_rows_is_no_data_with_chartevents_coverage() -> None
     assert "No-Data" in body["summary"] or "zero rows" in body["summary"].lower()
 
 
+def test_procedures_grounded_from_hosp_and_icu_with_honest_provenance() -> None:
+    """Procedure QA returns hospital ICD and ICU procedureevents with per-source Provenance."""
+    sid, hadm = 10021487, 28998349
+    question = "What procedures were coded for this admission?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(template_id="procedures", slots={}),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "grounded"
+    assert body["template_id"] == "procedures"
+    tables = {p["table"] for p in body["provenance"]}
+    assert "procedures_icd" in tables
+    assert "procedureevents" in tables
+    assert body["provenance"], "expected non-empty provenance from source rows"
+    for p in body["provenance"]:
+        assert p["table"] in ("procedures_icd", "procedureevents")
+        assert p["field"]
+        assert p["row_id"] is not None
+        assert p["time"]
+        if p["table"] == "procedures_icd":
+            assert p["field"] == "icd_code"
+            assert ":" in str(p["row_id"])
+        else:
+            assert p["field"] == "starttime"
+            assert str(p["row_id"]).isdigit() or isinstance(p["row_id"], int)
+
+
+def test_procedures_zero_rows_is_no_data_with_coverage() -> None:
+    """Zero hospital and ICU procedures for the Admission → No-Data with coverage."""
+    sid, hadm = 10002930, 28301173
+    question = "What procedures were coded for this admission?"
+    interp = _ScriptedInterpreter(
+        "fake",
+        TemplateChoice(template_id="procedures", slots={}),
+    )
+    with _client_with(interp) as c:
+        res = c.post(
+            "/qa",
+            json={"question": question, "subject_id": sid, "hadm_id": hadm},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["kind"] == "no_data"
+    assert body["template_id"] == "procedures"
+    assert body["rows"] == []
+    assert body["provenance"] == []
+    assert body["coverage"]
+    assert body["coverage"][0]["table"] in ("procedures_icd", "procedureevents")
+    assert "no" != body["summary"].strip().lower()
+    assert "No-Data" in body["summary"] or "zero rows" in body["summary"].lower()
+
+
 def test_qa_examples(client: TestClient) -> None:
     res = client.get("/qa/examples")
     assert res.status_code == 200

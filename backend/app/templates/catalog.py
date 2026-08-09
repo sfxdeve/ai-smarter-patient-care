@@ -170,22 +170,71 @@ def run_icu_stay(
 def run_procedures(
     con: duckdb.DuckDBPyConnection, subject_id: int, hadm_id: int | None, slots: dict[str, Any]
 ) -> TemplateResult:
+    """Hospital ICD procedures and ICU procedure events (Timeline Event taxonomy)."""
     bound = _bind_context(slots, subject_id, hadm_id)
-    sql = """
-    SELECT p.seq_num, CAST(p.chartdate AS VARCHAR) AS chartdate, p.icd_code, d.long_title
+    params = [bound["subject_id"], bound.get("hadm_id"), bound.get("hadm_id")]
+    hosp_sql = """
+    SELECT p.hadm_id, p.seq_num, CAST(p.chartdate AS VARCHAR) AS event_time,
+           p.icd_code, d.long_title
     FROM procedures_icd p
     LEFT JOIN d_icd_procedures d
       ON p.icd_code = d.icd_code AND p.icd_version = d.icd_version
     WHERE p.subject_id = ? AND (? IS NULL OR p.hadm_id = ?)
     ORDER BY p.chartdate, p.seq_num
     """
-    params = [bound["subject_id"], bound.get("hadm_id"), bound.get("hadm_id")]
-    rows = fetchall_dicts(con, sql, params)
-    prov = [
-        _prov("procedures_icd", "icd_code", f"{bound.get('hadm_id')}:{r['seq_num']}", r["chartdate"])
-        for r in rows
-    ]
-    return TemplateResult(rows=rows, provenance=prov, sql=sql.strip(), coverage_table="procedures_icd")
+    icu_sql = """
+    SELECT pe.hadm_id, pe.orderid, pe.stay_id,
+           CAST(pe.starttime AS VARCHAR) AS event_time,
+           CAST(pe.endtime AS VARCHAR) AS end_time,
+           d.label
+    FROM procedureevents pe
+    LEFT JOIN d_items d ON pe.itemid = d.itemid
+    WHERE pe.subject_id = ? AND (? IS NULL OR pe.hadm_id = ?)
+    ORDER BY pe.starttime
+    """
+    paired: list[tuple[dict[str, Any], Provenance]] = []
+    for r in fetchall_dicts(con, hosp_sql, params):
+        row = {
+            "source": "procedures_icd",
+            "hadm_id": r["hadm_id"],
+            "event_time": r["event_time"],
+            "label": r["long_title"] or f"Procedure {r['icd_code']}",
+            "detail": r["icd_code"],
+            "seq_num": r["seq_num"],
+        }
+        paired.append(
+            (
+                row,
+                _prov(
+                    "procedures_icd",
+                    "icd_code",
+                    f"{r['hadm_id']}:{r['seq_num']}",
+                    r["event_time"],
+                ),
+            )
+        )
+    for r in fetchall_dicts(con, icu_sql, params):
+        orderid = int(r["orderid"]) if r["orderid"] is not None else None
+        row = {
+            "source": "procedureevents",
+            "hadm_id": r["hadm_id"],
+            "event_time": r["event_time"],
+            "end_time": r["end_time"],
+            "label": r["label"] or "ICU procedure",
+            "stay_id": int(r["stay_id"]) if r["stay_id"] is not None else None,
+            "orderid": orderid,
+        }
+        paired.append(
+            (
+                row,
+                _prov("procedureevents", "starttime", orderid, r["event_time"]),
+            )
+        )
+    paired.sort(key=lambda item: (item[0].get("event_time") or "", item[0]["source"]))
+    rows = [item[0] for item in paired]
+    prov = [item[1] for item in paired]
+    sql = f"-- procedures: union hosp ICD + ICU procedureevents\n{hosp_sql.strip()}\n-- UNION\n{icu_sql.strip()}"
+    return TemplateResult(rows=rows, provenance=prov, sql=sql, coverage_table="procedures_icd")
 
 
 def run_microbiology(
@@ -558,7 +607,10 @@ CATALOG: list[TemplateDef] = [
     TemplateDef(
         id="procedures",
         name="Procedures",
-        description="Hospital ICD procedures for a Patient/Admission.",
+        description=(
+            "Hospital ICD procedures and ICU procedure events for a Patient/Admission "
+            "(union matching the Timeline Event taxonomy)."
+        ),
         slots=["hadm_id"],
         example_question="What procedures were coded for this admission?",
         coverage_table="procedures_icd",
